@@ -1,12 +1,8 @@
 source 'https://rubygems.org'
 
 gem 'devise'
-
 gem 'devise_token_auth'
-
 gem 'omniauth'
-
-gem 'activeadmin', '~> 1.0.0.pre1'
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
 gem 'rails', '4.2.3'
