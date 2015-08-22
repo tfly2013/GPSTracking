@@ -63,15 +63,11 @@ GEM
       responders
       thread_safe (~> 0.1)
       warden (~> 1.2.3)
-    devise_token_auth (0.1.34)
-      devise (= 3.5.1)
-      rails (~> 4.2)
     erubis (2.7.0)
     execjs (2.6.0)
     globalid (0.3.6)
       activesupport (>= 4.1.0)
     gmaps4rails (2.1.2)
-    hashie (3.4.2)
     i18n (0.7.0)
     jbuilder (2.3.1)
       activesupport (>= 3.0.0, < 5)
@@ -91,9 +87,6 @@ GEM
     multi_json (1.11.2)
     nokogiri (1.6.6.2-x64-mingw32)
       mini_portile (~> 0.6.0)
-    omniauth (1.2.2)
-      hashie (>= 1.2, < 4)
-      rack (~> 1.0)
     orm_adapter (0.5.0)
     rack (1.6.4)
     rack-test (0.6.3)
@@ -137,6 +130,10 @@ GEM
     sdoc (0.4.1)
       json (~> 1.7, >= 1.7.7)
       rdoc (~> 4.0)
+    simple_token_authentication (1.10.0)
+      actionmailer (>= 3.2.6, < 5)
+      actionpack (>= 3.2.6, < 5)
+      devise (~> 3.2)
     sprockets (3.3.1)
       rack (~> 1.0)
     sprockets-rails (2.3.2)
@@ -173,14 +170,13 @@ DEPENDENCIES
   byebug
   coffee-script-source (= 1.8.0)
   devise
-  devise_token_auth
   gmaps4rails
   jbuilder (~> 2.0)
   jquery-rails
-  omniauth
   rails (= 4.2.3)
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
+  simple_token_authentication
   sqlite3
   turbolinks
   tzinfo-data
