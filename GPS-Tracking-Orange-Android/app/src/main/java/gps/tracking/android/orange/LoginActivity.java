@@ -44,7 +44,7 @@ import java.util.Map;
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
-    private static final String LOGIN_URL= "https://stormy-bastion-5570.herokuapp.com/api/sign_in";
+    private static final String LOGIN_URL = "https://stormy-bastion-5570.herokuapp.com/api/sign_in";
     private RequestQueue requestQueue;
     private SharedPreferences mPreferences;
 
@@ -61,6 +61,13 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         mPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
         requestQueue = Volley.newRequestQueue(this);
+
+        // Login with token
+        String email = mPreferences.getString("Email", null);
+        String token = mPreferences.getString("AuthToken", null);
+        if (email != null && token != null)
+            loginWithToken(email, token);
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -138,48 +145,92 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             // form field with an error.
             focusView.requestFocus();
         } else {
-            Map<String, String> params = new HashMap<>();
-            params.put("user[email]", mEmailView.getText().toString());
-            params.put("user[password]", mPasswordView.getText().toString());
-
-            JsonObjectParamRequest jsObjRequest = new JsonObjectParamRequest
-                    (Request.Method.POST, LOGIN_URL, params, new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            try {
-                                if (response.getBoolean("success")) {
-                                    // everything is ok
-                                    SharedPreferences.Editor editor = mPreferences.edit();
-                                    // save the returned auth_token into the SharedPreferences
-                                    editor.putString("AuthToken", response.getJSONObject("data").getString("auth_token"));
-                                    editor.apply();
-                                    // launch the HomeActivity and close this one
-                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                    startActivity(intent);
-                                    finish();
-                                }
-                                Toast.makeText(getApplicationContext(), response.getString("info"), Toast.LENGTH_LONG).show();
-                            } catch (Exception e) {
-                                // something went wrong: show a Toast
-                                // with the exception message
-                                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                            }
-                            showProgress(false);
-                        }
-                    }, new Response.ErrorListener() {
-
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
-                            showProgress(false);
-                        }
-                    });
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            showProgress(true);
-            // Access the RequestQueue through your singleton class.
-            requestQueue.add(jsObjRequest);
+            loginWithPassword(mEmailView.getText().toString(), mPasswordView.getText().toString());
         }
+    }
+
+    private void loginWithToken(String email, String token) {
+        Map<String, String> params = new HashMap<>();
+        params.put("user_email", email);
+        params.put("user_token", token);
+
+        JsonObjectParamRequest jsObjRequest = new JsonObjectParamRequest
+                (Request.Method.POST, LOGIN_URL, params, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if (response.getBoolean("success")) {
+                                // everything is ok
+                                // launch the HomeActivity and close this one
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                            Toast.makeText(getApplicationContext(), response.getString("info"), Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                            // something went wrong: show a Toast with the exception message
+                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                            showProgress(false);
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                        showProgress(false);
+                    }
+                });
+        // Show a progress spinner, and kick off a background task to
+        // perform the user login attempt.
+        showProgress(true);
+        // Access the RequestQueue through your singleton class.
+        requestQueue.add(jsObjRequest);
+    }
+
+    private void loginWithPassword(String email, String password) {
+        Map<String, String> params = new HashMap<>();
+        params.put("user[email]", email);
+        params.put("user[password]", password);
+
+        JsonObjectParamRequest jsObjRequest = new JsonObjectParamRequest
+                (Request.Method.POST, LOGIN_URL, params, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            if (response.getBoolean("success")) {
+                                // everything is ok
+                                SharedPreferences.Editor editor = mPreferences.edit();
+                                // save the returned auth_token into the SharedPreferences
+                                editor.putString("Email", response.getJSONObject("data").getString("email"));
+                                editor.putString("AuthToken", response.getJSONObject("data").getString("auth_token"));
+                                editor.apply();
+                                // launch the HomeActivity and close this one
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                            Toast.makeText(getApplicationContext(), response.getString("info"), Toast.LENGTH_LONG).show();
+                        } catch (Exception e) {
+                            // something went wrong: show a Toast
+                            // with the exception message
+                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                            showProgress(false);
+                        }
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                        showProgress(false);
+                    }
+                });
+        // Show a progress spinner, and kick off a background task to
+        // perform the user login attempt.
+        showProgress(true);
+        // Access the RequestQueue through your singleton class.
+        requestQueue.add(jsObjRequest);
     }
 
     private boolean isEmailValid(String email) {
