@@ -27,10 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.Volley;
 
 import org.json.JSONObject;
 
@@ -45,8 +43,8 @@ import java.util.Map;
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     private static final String LOGIN_URL = "https://stormy-bastion-5570.herokuapp.com/api/sign_in";
-    private RequestQueue requestQueue;
-    private SharedPreferences mPreferences;
+
+    private SharedPreferences userPreferences;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -59,14 +57,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
-        requestQueue = Volley.newRequestQueue(this);
-
-        // Login with token
-        String email = mPreferences.getString("Email", null);
-        String token = mPreferences.getString("AuthToken", null);
-        if (email != null && token != null)
-            loginWithToken(email, token);
+        userPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -98,6 +89,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        // Try to Login with token
+        String email = userPreferences.getString("Email", null);
+        String token = userPreferences.getString("AuthToken", null);
+        if (email != null && token != null)
+            loginWithToken(email, token);
     }
 
     private void populateAutoComplete() {
@@ -185,7 +182,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         // perform the user login attempt.
         showProgress(true);
         // Access the RequestQueue through your singleton class.
-        requestQueue.add(jsObjRequest);
+        VolleyHelper.getInstance(this).addToRequestQueue(jsObjRequest);
     }
 
     private void loginWithPassword(String email, String password) {
@@ -200,7 +197,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                         try {
                             if (response.getBoolean("success")) {
                                 // everything is ok
-                                SharedPreferences.Editor editor = mPreferences.edit();
+                                SharedPreferences.Editor editor = userPreferences.edit();
                                 // save the returned auth_token into the SharedPreferences
                                 editor.putString("Email", response.getJSONObject("data").getString("email"));
                                 editor.putString("AuthToken", response.getJSONObject("data").getString("auth_token"));
@@ -230,7 +227,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         // perform the user login attempt.
         showProgress(true);
         // Access the RequestQueue through your singleton class.
-        requestQueue.add(jsObjRequest);
+        VolleyHelper.getInstance(this).addToRequestQueue(jsObjRequest);
     }
 
     private boolean isEmailValid(String email) {

@@ -1,11 +1,15 @@
 package gps.tracking.android.orange;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
+
+    private Intent serviceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +32,23 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_sign_out) {
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void OnTripStart(View view) {
+        view.setVisibility(View.GONE);
+        findViewById(R.id.btn_trip_stop).setVisibility(View.VISIBLE);
+        serviceIntent = new Intent(getApplicationContext(), DataService.class);
+        startService(serviceIntent);
+    }
+
+    public void OnTripStop(View view) {
+        view.setVisibility(View.GONE);
+        findViewById(R.id.btn_trip_start).setVisibility(View.VISIBLE);
+        stopService(serviceIntent);
     }
 }

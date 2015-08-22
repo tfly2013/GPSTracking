@@ -12,5 +12,16 @@
         android:text="@string/start_trip"
         android:id="@+id/btn_trip_start"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="OnTripStart"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/stop_trip"
+        android:id="@+id/btn_trip_stop"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="OnTripStop"
+        android:visibility="gone"/>
 </RelativeLayout>
