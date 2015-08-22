@@ -154,6 +154,8 @@ GEM
     sdoc (0.4.1)
       json (~> 1.7, >= 1.7.7)
       rdoc (~> 4.0)
+    simple-navigation (4.0.3)
+      activesupport (>= 2.3.2)
     simple_token_authentication (1.10.0)
       actionmailer (>= 3.2.6, < 5)
       actionpack (>= 3.2.6, < 5)
@@ -202,6 +204,7 @@ DEPENDENCIES
   rspec-rails (~> 3.0)
   sass-rails (~> 5.0)
   sdoc (~> 0.4.0)
+  simple-navigation
   simple_token_authentication
   turbolinks
   tzinfo-data
