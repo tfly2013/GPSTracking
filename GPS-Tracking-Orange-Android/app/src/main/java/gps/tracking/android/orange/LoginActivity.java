@@ -44,7 +44,7 @@ import java.util.Map;
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
-    private static final String LOGIN_URL= "http://26642c73.ngrok.io/api/sign_in";
+    private static final String LOGIN_URL= "https://stormy-bastion-5570.herokuapp.com/api/sign_in";
     private RequestQueue requestQueue;
     private SharedPreferences mPreferences;
 
@@ -189,7 +189,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
-        return password.length() > 8;
+        return password.length() >= 8;
     }
 
     /**
