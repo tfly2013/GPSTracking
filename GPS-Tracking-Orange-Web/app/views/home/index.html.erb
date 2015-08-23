@@ -1,3 +1,6 @@
+<% if user_signed_in? %>
+<%= link_to'GPS Locations', api_locations_path %>
+<% end %>
 <h1>Home#index</h1>
 <p>
 	Find me in app/views/home/index.html.erb

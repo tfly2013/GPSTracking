@@ -2,12 +2,14 @@ package gps.tracking.android.orange;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -21,7 +23,12 @@ import com.google.android.gms.location.LocationServices;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class DataService extends Service implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, LocationListener {
+
+    private SharedPreferences userPreferences;
 
     private GoogleApiClient apiClient;
 
@@ -37,6 +44,7 @@ public class DataService extends Service implements GoogleApiClient.OnConnection
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        userPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
         buildGoogleApiClient();
         apiClient.connect();
         return START_STICKY;
@@ -80,9 +88,9 @@ public class DataService extends Service implements GoogleApiClient.OnConnection
             locationObj.put("latitude", location.getLatitude());
             locationObj.put("longitude", location.getLongitude());
             locationObj.put("accuracy", location.getAccuracy());
-            locationObj.put("speed", location.getSpeed());8
+            locationObj.put("speed", location.getSpeed());
             locationObj.put("time", location.getTime());
-            jsonObj.put("api_location",locationObj);
+            jsonObj.put("api_location", locationObj);
         } catch (JSONException e) {
             Toast.makeText(DataService.this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
@@ -97,7 +105,20 @@ public class DataService extends Service implements GoogleApiClient.OnConnection
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(DataService.this, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                     }
-                });
+                }) {
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                String email = userPreferences.getString("Email", null);
+                String token = userPreferences.getString("AuthToken", null);
+                HashMap<String, String> params = new HashMap<>();
+                params.put("Accept", "application/json");
+                params.put("Content-Type", "application/json");
+                params.put("X-User-Email", email);
+                params.put("X-User-Token", token);
+                return params;
+            }
+        };
         VolleyHelper.getInstance(DataService.this).addToRequestQueue(jsObjRequest);
     }
 
