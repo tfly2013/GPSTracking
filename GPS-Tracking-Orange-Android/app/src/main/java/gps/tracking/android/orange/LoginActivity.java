@@ -29,7 +29,9 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -42,7 +44,7 @@ import java.util.Map;
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
-    private static final String LOGIN_URL = "https://stormy-bastion-5570.herokuapp.com/api/sign_in";
+    private static final String LOGIN_URL = "http://stormy-bastion-5570.herokuapp.com/api/sign_in";
 
     private SharedPreferences userPreferences;
 
@@ -150,9 +152,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         Map<String, String> params = new HashMap<>();
         params.put("user_email", email);
         params.put("user_token", token);
+        JSONObject jsonObj = new JSONObject(params);
 
-        JsonObjectParamRequest jsObjRequest = new JsonObjectParamRequest
-                (Request.Method.POST, LOGIN_URL, params, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.POST, LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
@@ -186,12 +189,20 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     }
 
     private void loginWithPassword(String email, String password) {
-        Map<String, String> params = new HashMap<>();
-        params.put("user[email]", email);
-        params.put("user[password]", password);
+        JSONObject userObj = new JSONObject();
+        JSONObject jsonObj = new JSONObject();
+        try {
+            userObj.put("email", email);
+            userObj.put("password", password);
+            jsonObj.put("user", userObj);
+        }
+        catch (JSONException e){
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+            return;
+        }
 
-        JsonObjectParamRequest jsObjRequest = new JsonObjectParamRequest
-                (Request.Method.POST, LOGIN_URL, params, new Response.Listener<JSONObject>() {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.POST, LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {

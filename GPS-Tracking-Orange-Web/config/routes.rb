@@ -1,10 +1,14 @@
 Rails.application.routes.draw do
+
   devise_for :users
+  
   namespace :api do
     devise_scope :user do
       post 'sign_in' => 'sessions#create'
       delete 'sign_out' => 'sessions#destroy'
     end
+    get 'locations' => 'locations#index'
+    post 'locations' => 'locations#create'
   end
 
   get 'home/index'

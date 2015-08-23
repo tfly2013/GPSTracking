@@ -9,8 +9,6 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Intent serviceIntent;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,13 +40,12 @@ public class MainActivity extends AppCompatActivity {
     public void OnTripStart(View view) {
         view.setVisibility(View.GONE);
         findViewById(R.id.btn_trip_stop).setVisibility(View.VISIBLE);
-        serviceIntent = new Intent(getApplicationContext(), DataService.class);
-        startService(serviceIntent);
+        startService(new Intent(this, DataService.class));
     }
 
     public void OnTripStop(View view) {
         view.setVisibility(View.GONE);
         findViewById(R.id.btn_trip_start).setVisibility(View.VISIBLE);
-        stopService(serviceIntent);
+        stopService(new Intent(this, DataService.class));
     }
 }
