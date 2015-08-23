@@ -5,7 +5,7 @@ class CreateApiLocations < ActiveRecord::Migration
       t.float :longitude
       t.float :accuracy
       t.float :speed
-      t.integer :time
+      t.datetime :time
       t.references :user, index: true, foreign_key: true
 
       t.timestamps null: false

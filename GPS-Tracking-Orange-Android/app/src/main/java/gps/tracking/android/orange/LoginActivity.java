@@ -44,8 +44,6 @@ import java.util.Map;
  */
 public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
-    private static final String LOGIN_URL = "http://stormy-bastion-5570.herokuapp.com/api/sign_in";
-
     private SharedPreferences userPreferences;
 
     // UI references.
@@ -155,7 +153,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         JSONObject jsonObj = new JSONObject(params);
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.POST, LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
+                (Request.Method.POST, VolleyHelper.LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
@@ -202,7 +200,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.POST, LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
+                (Request.Method.POST, VolleyHelper.LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {

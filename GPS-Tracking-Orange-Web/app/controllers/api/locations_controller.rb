@@ -9,9 +9,9 @@ class Api::LocationsController < ApplicationController
   # POST /api/locations.json
   def create
     @api_location = Api::Location.new(api_location_params)
-    respond_to do |format|
-      format.json {render :status => 200}
-    end
+    @api_location.time = Time.at(api_location_params[:time] / 1000)
+    @api_location.save
+    render :status => 200, :json => { :success => true }
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
@@ -19,3 +19,4 @@ class Api::LocationsController < ApplicationController
     params.require(:api_location).permit(:latitude, :longitude, :accuracy, :speed, :time)
   end
 end
+
