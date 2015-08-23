@@ -59,6 +59,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         userPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
 
+        mLoginFormView = findViewById(R.id.login_form);
+        mProgressView = findViewById(R.id.login_progress);
+
+        // Try to Login with token
+        String email = userPreferences.getString("Email", null);
+        String token = userPreferences.getString("AuthToken", null);
+        if (email != null && token != null)
+            loginWithToken(email, token);
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -86,15 +95,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 attemptLogin();
             }
         });
-
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
-
-        // Try to Login with token
-        String email = userPreferences.getString("Email", null);
-        String token = userPreferences.getString("AuthToken", null);
-        if (email != null && token != null)
-            loginWithToken(email, token);
     }
 
     private void populateAutoComplete() {
@@ -175,8 +175,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getApplicationContext(), error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), error.networkResponse.statusCode + "", Toast.LENGTH_LONG).show();
                         showProgress(false);
+
                     }
                 });
         // Show a progress spinner, and kick off a background task to
@@ -220,7 +221,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                         } catch (Exception e) {
                             // something went wrong: show a Toast
                             // with the exception message
-                            Toast.makeText(getApplicationContext(), e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
                             showProgress(false);
                         }
                     }
@@ -228,7 +229,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), error.networkResponse.statusCode + "", Toast.LENGTH_LONG).show();
                         showProgress(false);
                     }
                 });

@@ -9,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -46,22 +47,15 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_sign_out) {
-//            signOut();
+            signOut();
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     private void signOut() {
-        String email = userPreferences.getString("Email", null);
-        String token = userPreferences.getString("AuthToken", null);
-        Map<String, String> params = new HashMap<>();
-        params.put("user_email", email);
-        params.put("user_token", token);
-        JSONObject jsonObj = new JSONObject(params);
-
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.DELETE, VolleyHelper.LOGOUT_URL, jsonObj, new Response.Listener<JSONObject>() {
+                (Request.Method.DELETE, VolleyHelper.LOGOUT_URL, new JSONObject(), new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
@@ -83,7 +77,19 @@ public class MainActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(getApplicationContext(), error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                     }
-                });
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                String email = userPreferences.getString("Email", null);
+                String token = userPreferences.getString("AuthToken", null);
+                HashMap<String, String> params = new HashMap<>();
+                params.put("Accept", "application/json");
+                params.put("Content-Type", "application/json");
+                params.put("X-User-Email", email);
+                params.put("X-User-Token", token);
+                return params;
+            }
+        };
         VolleyHelper.getInstance(this).addToRequestQueue(jsObjRequest);
     }
 
