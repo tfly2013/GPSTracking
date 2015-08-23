@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Api::LocationController, type: :controller do
+RSpec.describe Api::LocationsController, type: :controller do
 
   describe "GET #index" do
     it "returns http success" do

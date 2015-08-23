@@ -1,4 +1,4 @@
-class Api::LocationController < ApplicationController
+class Api::LocationsController < ApplicationController
   # GET /api/locations
   # GET /api/locations.json
   def index

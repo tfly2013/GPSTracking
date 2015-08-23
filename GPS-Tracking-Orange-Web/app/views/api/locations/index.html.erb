@@ -1,6 +1,6 @@
 <h1>Listing Api Locations</h1>
 
-<table>
+<table border="1">
   <thead>
     <tr>
       <th>Latitude</th>
@@ -22,14 +22,8 @@
         <td><%= api_location.speed %></td>
         <td><%= api_location.time %></td>
         <td><%= api_location.user %></td>
-        <td><%= link_to 'Show', api_location %></td>
-        <td><%= link_to 'Edit', edit_api_location_path(api_location) %></td>
-        <td><%= link_to 'Destroy', api_location, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
   </tbody>
 </table>
-
 <br>
-
-<%= link_to 'New Location', new_api_location_path %>
