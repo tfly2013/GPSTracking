@@ -1,8 +1,15 @@
 Rails.application.routes.draw do
-
-  resources :trips
+  
   devise_for :users
   
+  get 'trips', to: 'trips#index'
+  get '/trips/:id', to: 'trips#show'
+  get '/trips/:id/edit', to: 'trips#edit'
+  put '/trips/:id', to: 'trips#update'
+  
+  get 'reports', to: 'reports#index'
+  get '/reports/:id', to: 'reports#show'
+   
   namespace :api do
     devise_scope :user do
       post 'sign_in' => 'sessions#create'
