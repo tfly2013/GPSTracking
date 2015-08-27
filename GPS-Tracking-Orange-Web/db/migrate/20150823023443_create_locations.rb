@@ -1,6 +1,6 @@
-class CreateApiLocations < ActiveRecord::Migration
+class CreateLocations < ActiveRecord::Migration
   def change
-    create_table :api_locations do |t|
+    create_table :locations do |t|
       t.float :latitude
       t.float :longitude
       t.float :accuracy

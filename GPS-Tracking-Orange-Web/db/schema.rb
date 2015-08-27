@@ -16,19 +16,6 @@ ActiveRecord::Schema.define(version: 20150823023443) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "api_locations", force: :cascade do |t|
-    t.float    "latitude"
-    t.float    "longitude"
-    t.float    "accuracy"
-    t.float    "speed"
-    t.datetime "time"
-    t.integer  "user_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  add_index "api_locations", ["user_id"], name: "index_api_locations_on_user_id", using: :btree
-
   create_table "locations", force: :cascade do |t|
     t.float    "latitude"
     t.float    "longitude"
@@ -62,6 +49,5 @@ ActiveRecord::Schema.define(version: 20150823023443) do
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
-  add_foreign_key "api_locations", "users"
   add_foreign_key "locations", "users"
 end
