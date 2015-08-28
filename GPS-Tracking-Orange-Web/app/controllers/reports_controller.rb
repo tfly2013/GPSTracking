@@ -1,5 +1,6 @@
 class ReportsController < ApplicationController
-
+  before_action :authenticate_user!
+  
   # GET /reports
   # GET /reports.json
   def index
