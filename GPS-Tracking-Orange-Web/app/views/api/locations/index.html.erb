@@ -1,26 +1,36 @@
 <h1>Listing Locations</h1>
+<div style='width: 800px;'>
+	<div id="map" style='width: 800px; height: 400px;'></div>
+</div>
+
+<br />
 
 <table border="1">
-  <thead>
-    <tr>
-      <th>Latitude</th>
-      <th>Longitude</th>
-      <th>Accuracy</th>
-      <th>Speed</th>
-      <th>Time</th>
-    </tr>
-  </thead>
+	<thead>
+		<tr>
+			<th>Latitude</th>
+			<th>Longitude</th>
+			<th>Accuracy</th>
+			<th>Speed</th>
+			<th>Time</th>
+		</tr>
+	</thead>
 
-  <tbody>
-    <% @locations.each do |api_location| %>
-      <tr>
-        <td><%= api_location.latitude %></td>
-        <td><%= api_location.longitude %></td>
-        <td><%= api_location.accuracy %></td>
-        <td><%= api_location.speed %></td>
-        <td><%= api_location.time %></td>
-      </tr>
-    <% end %>
-  </tbody>
+	<tbody>
+		<% @locations.each do |api_location| %>
+		<tr>
+			<td><%= api_location.latitude %></td>
+			<td><%= api_location.longitude %></td>
+			<td><%= api_location.accuracy %></td>
+			<td><%= api_location.speed %></td>
+			<td><%= api_location.time %></td>
+		</tr>
+		<% end %>
+	</tbody>
 </table>
 <br>
+
+<script type="text/javascript">
+var path = <%= raw @path.to_json %>;
+var raw = <%= raw @raw.to_json %>;
+</script>

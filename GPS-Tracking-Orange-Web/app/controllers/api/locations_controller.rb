@@ -1,10 +1,17 @@
 class Api::LocationsController < ApplicationController
   before_action :authenticate_user!, only: [:index]
-  
   # GET /api/locations
   # GET /api/locations.json
   def index
     @locations = current_user.locations
+    @path = []
+    @locations.each do |location|
+      @path << location.latitude.to_s + "," + location.longitude.to_s
+    end
+    @raw = Gmaps4rails.build_markers(@locations) do |location, marker|
+      marker.lat location.latitude
+      marker.lng location.longitude
+    end
   end
 
   # POST /api/locations
@@ -22,4 +29,3 @@ class Api::LocationsController < ApplicationController
     params.require(:location).permit(:latitude, :longitude, :accuracy, :speed, :time)
   end
 end
-
