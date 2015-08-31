@@ -1,12 +1,18 @@
 package gps.tracking.android.orange;
 
+import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -23,12 +29,25 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private SharedPreferences userPreferences;
+    private Button btnStart;
+    private Button btnStop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         userPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
+
+        btnStart = (Button) findViewById(R.id.btn_trip_start);
+        btnStop = (Button) findViewById(R.id.btn_trip_stop);
+        if (isServiceRunning(DataService.class)) {
+            btnStart.setVisibility(View.GONE);
+            btnStop.setVisibility(View.VISIBLE);
+        } else {
+            btnStart.setVisibility(View.VISIBLE);
+            btnStop.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -93,15 +112,46 @@ public class MainActivity extends AppCompatActivity {
         VolleyHelper.getInstance(this).addToRequestQueue(jsObjRequest);
     }
 
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE))
+            if (serviceClass.getName().equals(service.service.getClassName()))
+                return true;
+        return false;
+    }
+
     public void OnTripStart(View view) {
-        view.setVisibility(View.GONE);
-        findViewById(R.id.btn_trip_stop).setVisibility(View.VISIBLE);
-        startService(new Intent(this, DataService.class));
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            buildAlertMessageNoGps();
+        } else {
+            view.setVisibility(View.GONE);
+            btnStop.setVisibility(View.VISIBLE);
+            startService(new Intent(this, DataService.class));
+        }
     }
 
     public void OnTripStop(View view) {
         view.setVisibility(View.GONE);
-        findViewById(R.id.btn_trip_start).setVisibility(View.VISIBLE);
+        btnStart.setVisibility(View.VISIBLE);
         stopService(new Intent(this, DataService.class));
+    }
+
+    private void buildAlertMessageNoGps() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        dialog.cancel();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
     }
 }

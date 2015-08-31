@@ -6,6 +6,7 @@ gem 'bootstrap-sass'
 gem 'gmaps4rails'
 gem 'underscore-rails'
 gem 'simple-navigation'
+gem 'dbscan'
 
 # Database
 gem 'pg'
