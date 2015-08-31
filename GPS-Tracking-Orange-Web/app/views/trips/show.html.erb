@@ -1,29 +1,39 @@
 <p id="notice"><%= notice %></p>
 
-<p>
-  <strong>Startlocation:</strong>
-  <%= @trip.startLocation %>
-</p>
+<h1>Trip</h1>
+<div style='width: 800px;'>
+  <div id="map" style='width: 800px; height: 400px;'></div>
+</div>
 
-<p>
-  <strong>Endlocation:</strong>
-  <%= @trip.endLocation %>
-</p>
+<br />
 
-<p>
-  <strong>Starttime:</strong>
-  <%= @trip.startTime %>
-</p>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Accuracy</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @locations.each do |location| %>
+    <tr>
+      <td><%= location.latitude %></td>
+      <td><%= location.longitude %></td>
+      <td><%= location.accuracy %></td>
+      <td><%= location.time %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<br>
 
-<p>
-  <strong>Endtime:</strong>
-  <%= @trip.endTime %>
-</p>
-
-<p>
-  <strong>User:</strong>
-  <%= @trip.user %>
-</p>
+<script type="text/javascript">
+var path = <%= raw @path.to_json %>;
+var raw = <%= raw @raw.to_json %>;
+$(snapToRoad);
+</script>
 
 <%= link_to 'Edit', edit_trip_path(@trip) %> |
 <%= link_to 'Back', trips_path %>

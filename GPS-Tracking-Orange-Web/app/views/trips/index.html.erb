@@ -5,11 +5,7 @@
 <table>
   <thead>
     <tr>
-      <th>Startlocation</th>
-      <th>Endlocation</th>
-      <th>Starttime</th>
-      <th>Endtime</th>
-      <th>User</th>
+      <th>Trip</th>
       <th colspan="2"></th>
     </tr>
   </thead>
@@ -17,11 +13,7 @@
   <tbody>
     <% @trips.each do |trip| %>
       <tr>
-        <td><%= trip.startLocation %></td>
-        <td><%= trip.endLocation %></td>
-        <td><%= trip.startTime %></td>
-        <td><%= trip.endTime %></td>
-        <td><%= trip.user %></td>
+        <td>Trip <%= @trips.index(trip) + 1 %></td>
         <td><%= link_to 'Show', trip %></td>
         <td><%= link_to 'Edit', edit_trip_path(trip) %></td>
       </tr>

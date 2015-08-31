@@ -1,5 +1,5 @@
 <% if user_signed_in? %>
-<%= link_to'GPS Locations', api_locations_path %>
+<%= link_to'Trips', trips_path %>
 <% end %>
 <h1>Home#index</h1>
 <p>
@@ -8,22 +8,3 @@
 <div style='width: 800px;'>
 	<div id="map" style='width: 800px; height: 400px;'></div>
 </div>
-<script type="text/javascript">
-	handler = Gmaps.build('Google');
-	handler.buildMap({
-		internal : {
-			id : 'geolocation'
-		}
-	}, function() {
-		if (navigator.geolocation)
-			navigator.geolocation.getCurrentPosition(displayOnMap);
-	});
-
-	function displayOnMap(position) {
-		var marker = handler.addMarker({
-			lat : position.coords.latitude,
-			lng : position.coords.longitude
-		});
-		handler.map.centerOn(marker);
-	};
-</script>

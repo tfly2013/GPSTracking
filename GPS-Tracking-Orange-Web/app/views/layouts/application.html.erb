@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>GPSTrackingOrangeWeb</title>
-		<%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-		<%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
-		<%= javascript_include_tag "//maps.google.com/maps/api/js?v=3.13&amp;sensor=false&amp;libraries=geometry", :type => "text/javascript" %>
-		<%= javascript_include_tag "//google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.0.14/src/markerclusterer_packed.js", :type => "text/javascript" %>
-		<%= csrf_meta_tags %>
-	</head>
-	<body>
-		<div>
-			<% if user_signed_in? %>
-				<%= link_to'Sign Out', destroy_user_session_path, :method => :delete %>
-				<br />
-				<%= link_to 'Edit registration', edit_user_registration_path %>
-			<% else %>
-				<%= link_to 'Sign In', new_user_session_path  %>
-				<br />
-				<%= link_to 'Register', new_user_registration_path  %>
-			<% end %>
-		</div>
-		<p class="notice">
-			<%= notice %>
-		</p>
-		<p class="alert">
-			<%= alert %>
-		</p>
-		<%= yield %>
-
-	</body>
+<head>
+	<title>GPSTrackingOrangeWeb</title>
+	<%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+	<%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+	<%= javascript_include_tag "//maps.google.com/maps/api/js?v=3.13&amp;sensor=false&amp;libraries=geometry", :type => "text/javascript" %>
+	<%= javascript_include_tag "//google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.0.14/src/markerclusterer_packed.js", :type => "text/javascript" %>
+	<%= csrf_meta_tags %>
+</head>
+<body>
+	<div>
+		<% if user_signed_in? %>
+		<%= link_to'Sign Out', destroy_user_session_path, :method => :delete %>
+		<br />
+		<%= link_to 'Edit registration', edit_user_registration_path %>
+		<% else %>
+		<%= link_to 'Sign In', new_user_session_path  %>
+		<br />
+		<%= link_to 'Register', new_user_registration_path  %>
+		<% end %>
+	</div>
+	<p class="notice" id="notice">
+		<%= notice %>
+	</p>
+	<p class="alert" id="alert">
+		<%= alert %>
+	</p>
+	<%= yield %>
+</body>
 </html>

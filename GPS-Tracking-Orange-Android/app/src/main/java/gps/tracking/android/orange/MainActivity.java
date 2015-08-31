@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +23,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -31,12 +35,14 @@ public class MainActivity extends AppCompatActivity {
     private SharedPreferences userPreferences;
     private Button btnStart;
     private Button btnStop;
+    private SQLiteDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         userPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
+        db = new LocationsDbHelper(this).getReadableDatabase();
 
         btnStart = (Button) findViewById(R.id.btn_trip_start);
         btnStop = (Button) findViewById(R.id.btn_trip_stop);
@@ -132,9 +138,84 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void OnTripStop(View view) {
+        JSONObject jsonObj = getLocationsFromDatabase();
+        sendData(jsonObj);
+
         view.setVisibility(View.GONE);
         btnStart.setVisibility(View.VISIBLE);
         stopService(new Intent(this, DataService.class));
+    }
+
+    /**
+     * WARNING: All DATA would be removed from database after this function call
+     *
+     * @return Json object to send.
+     */
+    private JSONObject getLocationsFromDatabase() {
+        String[] projection = {
+                LocationsDbHelper.LoctionEntry.COLUMN_NAME_LATITUDE,
+                LocationsDbHelper.LoctionEntry.COLUMN_NAME_LONGITUDE,
+                LocationsDbHelper.LoctionEntry.COLUMN_NAME_ACCURACY,
+                LocationsDbHelper.LoctionEntry.COLUMN_NAME_TIME
+        };
+        String sortOrder = LocationsDbHelper.LoctionEntry.COLUMN_NAME_TIME + " ASC";
+
+        Cursor cursor = db.query(LocationsDbHelper.LoctionEntry.TABLE_NAME, projection, null, null, null, null, sortOrder);
+        int latitudeIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LATITUDE);
+        int longitudeIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LONGITUDE);
+        int accuracyIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_ACCURACY);
+        int timeIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_TIME);
+        cursor.moveToFirst();
+
+        JSONObject jsonObj = new JSONObject();
+        JSONArray locationArray = new JSONArray();
+        try {
+            while (!cursor.isAfterLast()) {
+                JSONObject locationObj = new JSONObject();
+                locationObj.put("latitude", cursor.getFloat(latitudeIndex));
+                locationObj.put("longitude", cursor.getFloat(longitudeIndex));
+                locationObj.put("accuracy", cursor.getFloat(accuracyIndex));
+                locationObj.put("time", cursor.getLong(timeIndex));
+                locationArray.put(locationObj);
+                cursor.moveToNext();
+            }
+            jsonObj.put("locations", locationArray);
+        } catch (JSONException e) {
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+        cursor.close();
+
+        db.delete(LocationsDbHelper.LoctionEntry.TABLE_NAME, "1", null);
+        return jsonObj;
+    }
+
+    private void sendData(final JSONObject jsonObj) {
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                (Request.Method.POST, VolleyHelper.TRIP_URL, jsonObj, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Toast.makeText(MainActivity.this, "Data sent successfully.", Toast.LENGTH_LONG).show();
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        buildAlertMessageNetworkError(error, jsonObj);
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                String email = userPreferences.getString("Email", null);
+                String token = userPreferences.getString("AuthToken", null);
+                HashMap<String, String> params = new HashMap<>();
+                params.put("Accept", "application/json");
+                params.put("Content-Type", "application/json");
+                params.put("X-User-Email", email);
+                params.put("X-User-Token", token);
+                return params;
+            }
+        };
+        VolleyHelper.getInstance(MainActivity.this).addToRequestQueue(jsObjRequest);
     }
 
     private void buildAlertMessageNoGps() {
@@ -147,6 +228,31 @@ public class MainActivity extends AppCompatActivity {
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        dialog.cancel();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void buildAlertMessageNetworkError(VolleyError error, final JSONObject jsonObj) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        int errorCode = -1;
+        String errorMessage = null;
+        if (error.networkResponse != null) {
+            errorCode = error.networkResponse.statusCode;
+            errorMessage = error.getMessage();
+        }
+        builder.setMessage(String.format("Network Error: Code: %d, Message: %s.WARNING: You would lose ALL DATA of this trip if you choose to cancel. ",
+                errorCode, errorMessage))
+                .setCancelable(false)
+                .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
+                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        sendData(jsonObj);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
                         dialog.cancel();
                     }

@@ -175,9 +175,11 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getApplicationContext(), error.networkResponse.statusCode + "", Toast.LENGTH_LONG).show();
+                        int errorCode = -1;
+                        if (error.networkResponse != null)
+                            errorCode = error.networkResponse.statusCode;
+                            Toast.makeText(getApplicationContext(), errorCode + "", Toast.LENGTH_LONG).show();
                         showProgress(false);
-
                     }
                 });
         // Show a progress spinner, and kick off a background task to
@@ -194,8 +196,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             userObj.put("email", email);
             userObj.put("password", password);
             jsonObj.put("user", userObj);
-        }
-        catch (JSONException e){
+        } catch (JSONException e) {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
             return;
         }
@@ -229,7 +230,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getApplicationContext(), error.networkResponse.statusCode + "", Toast.LENGTH_LONG).show();
+                        int errorCode = -1;
+                        if (error.networkResponse != null)
+                            errorCode = error.networkResponse.statusCode;
+                        Toast.makeText(getApplicationContext(), errorCode + "", Toast.LENGTH_LONG).show();
                         showProgress(false);
                     }
                 });
