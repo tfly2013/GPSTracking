@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   
   devise_for :users
-  
+  resources :users
   resources :trips, only: [:index, :create, :show, :edit, :update]
   
   get 'reports', to: 'reports#index'
