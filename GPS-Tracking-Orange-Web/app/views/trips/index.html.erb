@@ -1,12 +1,11 @@
-<p id="notice"><%= notice %></p>
-
-<h1>Listing Trips</h1>
+<h1>Trips</h1>
 
 <table>
   <thead>
     <tr>
       <th>Trip</th>
-      <th colspan="2"></th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
 
@@ -14,8 +13,8 @@
     <% @trips.each do |trip| %>
       <tr>
         <td>Trip <%= @trips.index(trip) + 1 %></td>
-        <td><%= link_to 'Show', trip %></td>
-        <td><%= link_to 'Edit', edit_trip_path(trip) %></td>
+        <td><%= link_to 'Show', trip, :class => 'button-xs' %></td>
+        <td><%= link_to 'Edit', edit_trip_path(trip), :class => 'button-xs' %></td>
       </tr>
     <% end %>
   </tbody>

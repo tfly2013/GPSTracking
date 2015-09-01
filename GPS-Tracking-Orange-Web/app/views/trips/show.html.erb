@@ -1,8 +1,6 @@
-<p id="notice"><%= notice %></p>
-
 <h1>Trip</h1>
-<div style='width: 800px;'>
-  <div id="map" style='width: 800px; height: 400px;'></div>
+<div class="map-container">
+  <div id="map"></div>
 </div>
 
 <br />
@@ -34,5 +32,5 @@ var coordinates = <%= raw @coordinates.to_json %>;
 $(initMap());
 </script>
 
-<%= link_to 'Edit', edit_trip_path(@trip) %> |
-<%= link_to 'Back', trips_path %>
+<%= link_to 'Edit', edit_trip_path(@trip), :class => 'button-p' %>
+<%= link_to 'Back', trips_path, :class => 'button-p' %>
