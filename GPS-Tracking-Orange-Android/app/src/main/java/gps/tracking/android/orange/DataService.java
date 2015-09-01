@@ -70,7 +70,6 @@ public class DataService extends Service implements GoogleApiClient.OnConnection
 
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(DataService.this, location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_LONG).show();
         ContentValues values = new ContentValues();
         values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LATITUDE, location.getLatitude());
         values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LONGITUDE, location.getLongitude());

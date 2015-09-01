@@ -29,13 +29,9 @@ class TripsController < ApplicationController
   # GET /trips/1.json
   def show
     @locations = @trip.locations
-    @path = []
+    @coordinates = []
     @locations.each do |location|
-      @path << location.latitude.to_s + "," + location.longitude.to_s
-    end
-    @raw = Gmaps4rails.build_markers(@locations) do |location, marker|
-      marker.lat location.latitude
-      marker.lng location.longitude
+      @coordinates << {:lat => location.latitude, :lng => location.longitude}
     end
   end
 
