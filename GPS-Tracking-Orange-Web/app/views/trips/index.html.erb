@@ -14,7 +14,6 @@
       <tr>
         <td>Trip <%= @trips.index(trip) + 1 %></td>
         <td><%= link_to 'Show', trip, :class => 'button-xs' %></td>
-        <td><%= link_to 'Edit', edit_trip_path(trip), :class => 'button-xs' %></td>
       </tr>
     <% end %>
   </tbody>

@@ -1,0 +1,20 @@
+<h1>Editing Trip</h1>
+<%= form_for @segment, url: trip_segment_path(@trip, @segment), method: :patch do |f| %>
+  <p>
+    <%= f.label :startLocation %><br>
+    <%= f.text_field :startLocation %>
+  </p>
+   <p>
+    <%= f.label :endLocation %><br>
+    <%= f.text_field :endLocation %>
+  </p>
+  <p>
+    <%= f.label :transportation %><br>
+    <%= f.text_field :transportation %>
+  </p>
+  <p>
+    <%= f.submit "save changes", class: 'button-xs' %>
+  </p>
+<% end %>
+
+<%= link_to 'Back', @trip, :class => 'button-xs' %>

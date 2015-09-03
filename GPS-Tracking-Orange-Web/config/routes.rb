@@ -2,7 +2,10 @@ Rails.application.routes.draw do
   
   devise_for :users
   resources :users
-  resources :trips, only: [:index, :create, :show, :edit, :update]
+  # resources :trips, only: [:index, :create, :show, :edit, :update]
+  resources :trips do
+    resources :segments
+  end
   
   get 'reports', to: 'reports#index'
   get '/reports/:id', to: 'reports#show'

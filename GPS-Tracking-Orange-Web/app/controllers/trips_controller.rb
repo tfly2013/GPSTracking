@@ -28,11 +28,7 @@ class TripsController < ApplicationController
   # GET /trips/1
   # GET /trips/1.json
   def show
-    @locations = @trip.locations
-    @coordinates = []
-    @locations.each do |location|
-      @coordinates << {:lat => location.latitude, :lng => location.longitude}
-    end
+    @segments = @trip.segments
   end
 
   # GET /trips/1/edit
@@ -42,6 +38,13 @@ class TripsController < ApplicationController
   # PATCH/PUT /trips/1
   # PATCH/PUT /trips/1.json
   def update
+    @trip = Trip.find(params[:id])
+ 
+    if @trip.update(trip_params)
+      redirect_to @trip
+    else
+      render 'edit'
+    end
   end
 
   private
@@ -53,4 +56,7 @@ class TripsController < ApplicationController
     params.permit(:locations => [:latitude, :longitude,:accuracy,:time]).require(:locations)
   end
 
+  def trip_params
+    params.require(:trip).permit(:startLocation)
+  end
 end
