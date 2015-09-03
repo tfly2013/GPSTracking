@@ -16,7 +16,6 @@ module TripsHelper
     		prev = location
     		segment << location
     		next
-    	end
     	else
     		allSpeed += speed(prev, location)
     		avgSpeed4CurSegment = allSpeed.fdiv(segment.length)
@@ -42,8 +41,6 @@ module TripsHelper
     				unclear = false
     			end
     			tempStoppingSegment << location
-
-
 
 
     		# moveDistance > 0
@@ -72,6 +69,7 @@ module TripsHelper
     				end
     			end
     		end
+    	end
     	prev = location
     end
     return trip
@@ -100,4 +98,6 @@ module TripsHelper
     	#Set transportation method to cycling
     elsif averageSpeed > 20 #Concept only, if average speed is greater than 20km/h
     	#Set transportation method to motor vehicle
+    end
+  end
 end
