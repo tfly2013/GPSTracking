@@ -1,11 +1,8 @@
 Rails.application.routes.draw do
   
   devise_for :users
-  
-  get 'trips', to: 'trips#index'
-  get '/trips/:id', to: 'trips#show'
-  get '/trips/:id/edit', to: 'trips#edit'
-  put '/trips/:id', to: 'trips#update'
+  resources :users
+  resources :trips, only: [:index, :create, :show, :edit, :update]
   
   get 'reports', to: 'reports#index'
   get '/reports/:id', to: 'reports#show'
@@ -15,8 +12,6 @@ Rails.application.routes.draw do
       post 'sign_in' => 'sessions#create'
       delete 'sign_out' => 'sessions#destroy'
     end
-    get 'locations' => 'locations#index'
-    post 'locations' => 'locations#create'
   end
 
   get 'home/index'

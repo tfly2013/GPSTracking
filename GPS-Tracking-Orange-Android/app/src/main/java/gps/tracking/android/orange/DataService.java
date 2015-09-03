@@ -1,36 +1,25 @@
 package gps.tracking.android.orange;
 
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
-
 public class DataService extends Service implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, LocationListener {
 
-    private SharedPreferences userPreferences;
-
     private GoogleApiClient apiClient;
+    private SQLiteDatabase db;
 
     public DataService() {
 
@@ -44,7 +33,7 @@ public class DataService extends Service implements GoogleApiClient.OnConnection
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        userPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
+        db = new LocationsDbHelper(this).getWritableDatabase();
         buildGoogleApiClient();
         apiClient.connect();
         return START_STICKY;
@@ -81,45 +70,12 @@ public class DataService extends Service implements GoogleApiClient.OnConnection
 
     @Override
     public void onLocationChanged(Location location) {
-        Toast.makeText(DataService.this, location.getLatitude() + ", " + location.getLongitude(), Toast.LENGTH_LONG).show();
-        JSONObject jsonObj = new JSONObject();
-        JSONObject locationObj = new JSONObject();
-        try {
-            locationObj.put("latitude", location.getLatitude());
-            locationObj.put("longitude", location.getLongitude());
-            locationObj.put("accuracy", location.getAccuracy());
-            locationObj.put("speed", location.getSpeed());
-            locationObj.put("time", location.getTime());
-            jsonObj.put("api_location", locationObj);
-        } catch (JSONException e) {
-            Toast.makeText(DataService.this, e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.POST, VolleyHelper.LOCATION_URL, jsonObj, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(DataService.this, error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }) {
-
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                String email = userPreferences.getString("Email", null);
-                String token = userPreferences.getString("AuthToken", null);
-                HashMap<String, String> params = new HashMap<>();
-                params.put("Accept", "application/json");
-                params.put("Content-Type", "application/json");
-                params.put("X-User-Email", email);
-                params.put("X-User-Token", token);
-                return params;
-            }
-        };
-        VolleyHelper.getInstance(DataService.this).addToRequestQueue(jsObjRequest);
+        ContentValues values = new ContentValues();
+        values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LATITUDE, location.getLatitude());
+        values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LONGITUDE, location.getLongitude());
+        values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_ACCURACY, location.getAccuracy());
+        values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_TIME, location.getTime());
+        db.insert(LocationsDbHelper.LoctionEntry.TABLE_NAME, null, values);
     }
 
     @Override

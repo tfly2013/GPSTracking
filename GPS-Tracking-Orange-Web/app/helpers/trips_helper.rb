@@ -1,5 +1,5 @@
 module TripsHelper
-  
+
   def convert(locations)
   	trip = Array.new
   	segment = Array.new

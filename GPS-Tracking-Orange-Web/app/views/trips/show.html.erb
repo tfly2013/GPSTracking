@@ -1,29 +1,36 @@
-<p id="notice"><%= notice %></p>
+<h1>Trip</h1>
+<div class="map-container">
+  <div id="map"></div>
+</div>
 
-<p>
-  <strong>Startlocation:</strong>
-  <%= @trip.startLocation %>
-</p>
+<br />
 
-<p>
-  <strong>Endlocation:</strong>
-  <%= @trip.endLocation %>
-</p>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Accuracy</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @locations.each do |location| %>
+    <tr>
+      <td><%= location.latitude %></td>
+      <td><%= location.longitude %></td>
+      <td><%= location.accuracy %></td>
+      <td><%= location.time %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
+<br>
 
-<p>
-  <strong>Starttime:</strong>
-  <%= @trip.startTime %>
-</p>
+<script type="text/javascript">
+var coordinates = <%= raw @coordinates.to_json %>;
+$(initMap());
+</script>
 
-<p>
-  <strong>Endtime:</strong>
-  <%= @trip.endTime %>
-</p>
-
-<p>
-  <strong>User:</strong>
-  <%= @trip.user %>
-</p>
-
-<%= link_to 'Edit', edit_trip_path(@trip) %> |
-<%= link_to 'Back', trips_path %>
+<%= link_to 'Edit', edit_trip_path(@trip), :class => 'button-p' %>
+<%= link_to 'Back', trips_path, :class => 'button-p' %>
