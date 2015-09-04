@@ -139,7 +139,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void OnTripStop(View view) {
         JSONObject jsonObj = getLocationsFromDatabase();
-        sendData(jsonObj);
+        if (jsonObj != null)
+            sendData(jsonObj);
+        else
+            Toast.makeText(this,"No data available", Toast.LENGTH_LONG).show();
 
         view.setVisibility(View.GONE);
         btnStart.setVisibility(View.VISIBLE);
@@ -165,8 +168,10 @@ public class MainActivity extends AppCompatActivity {
         int longitudeIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LONGITUDE);
         int accuracyIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_ACCURACY);
         int timeIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_TIME);
-        cursor.moveToFirst();
 
+        if (cursor.getCount() == 0)
+            return null;
+        cursor.moveToFirst();
         JSONObject jsonObj = new JSONObject();
         JSONArray locationArray = new JSONArray();
         try {

@@ -1,6 +1,6 @@
 module TripsHelper
 
-  def convert(locations)
+  def convert(locatons)
   	trip = Array.new
   	segment = Array.new
   	tempStoppingSegment = Array.new

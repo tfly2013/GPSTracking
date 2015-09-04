@@ -1,4 +1,6 @@
 <h3>Profile</h3>
 <p>Email: <%= @user.email if @user.email %></p>
+<% if @user == current_user %>
 <%= link_to 'Change Password', edit_user_registration_path, :class => 'button-p' %>
-<%= button_to "Cancel my account", registration_path(@user), data: { confirm: "Are you sure?" }, method: :delete, :class => 'button-p' %>
+<% end %>
+<%= button_to "Cancel this account", registration_path(@user), data: { confirm: "Are you sure?" }, method: :delete, :class => 'button-p' %>

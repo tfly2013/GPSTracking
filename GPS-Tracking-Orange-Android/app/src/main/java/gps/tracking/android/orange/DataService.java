@@ -50,8 +50,9 @@ public class DataService extends Service implements GoogleApiClient.OnConnection
     @Override
     public void onConnected(Bundle bundle) {
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(1000);
+        locationRequest.setMaxWaitTime(60000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 apiClient, locationRequest, this);

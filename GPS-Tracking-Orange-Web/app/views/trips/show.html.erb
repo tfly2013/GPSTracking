@@ -5,28 +5,31 @@
 
 <br />
 
+<% @trip.segments.each do |segment| %>
+<p>Segment <%= @trip.segments.index(segment) + 1 %>
+<%= link_to 'Edit', edit_trip_segment_path(@trip, segment), :class => 'button-p' %></p>
 <table border="1">
   <thead>
     <tr>
-      <th>Segment ID</th>
-      <th>StartLocation</th>
-      <th>EndLocation</th>
-      <th>Transportation</th>
+      <th>Latitude</th>
+      <th>Longitude</th>
+      <th>Accuracy</th>
+      <th>Time</th>
     </tr>
   </thead>
   <tbody>
-    <% @trip.segments.each do |segment| %>
+    <% segment.locations.each do |location| %>
     <tr>
-      <td><%= segment.id%></td>
-      <td><%= segment.startLocation %></td>
-      <td><%= segment.endLocation %></td>
-      <td><%= segment.transportation %></td>
-      <td><%= link_to 'Edit', edit_trip_segment_path(@trip, segment), :class => 'button-p' %></td>
+      <td><%= location.latitude %></td>
+      <td><%= location.longitude %></td>
+      <td><%= location.accuracy %></td>
+      <td><%= location.time %></td>
     </tr>
     <% end %>
   </tbody>
 </table>
 <br>
+<% end %>
 
 <script type="text/javascript">
 var coordinates = <%= raw @coordinates.to_json %>;

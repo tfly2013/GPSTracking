@@ -28,7 +28,11 @@ class TripsController < ApplicationController
   # GET /trips/1
   # GET /trips/1.json
   def show
-    @segments = @trip.segments
+    @coordinates = []
+    @trip.locations.each do |location|
+      @coordinates << {:lat => location.latitude, :lng => location.longitude}
+    end
+
   end
 
   # GET /trips/1/edit
@@ -39,7 +43,7 @@ class TripsController < ApplicationController
   # PATCH/PUT /trips/1.json
   def update
     @trip = Trip.find(params[:id])
- 
+
     if @trip.update(trip_params)
       redirect_to @trip
     else

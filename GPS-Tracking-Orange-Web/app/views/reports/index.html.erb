@@ -1,1 +1,20 @@
-<h1>Listing Reports</h1>
+<h1>Reports</h1>
+<h3>Average Distance: <%= @average_distance %> km</h3>
+<h3>Average Speed: <%= @average_speed %> km/h</h3>
+<h3>Transportation Modes:</h3>
+<table border="1">
+  <thead>
+    <tr>
+      <th>Mode</th>
+      <th>Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @modes.each do |mode, count| %>
+    <tr>
+      <td><%= mode %></td>
+      <td><%= count %></td>
+    </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -3,13 +3,12 @@ Rails.application.routes.draw do
   devise_for :users
   resources :users
   # resources :trips, only: [:index, :create, :show, :edit, :update]
-  resources :trips do
-    resources :segments
+  resources :trips, only: [:index, :create, :show] do
+    resources :segments, only: [:edit, :update]
   end
   
   get 'reports', to: 'reports#index'
-  get '/reports/:id', to: 'reports#show'
-   
+     
   namespace :api do
     devise_scope :user do
       post 'sign_in' => 'sessions#create'
