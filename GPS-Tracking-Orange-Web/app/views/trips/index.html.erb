@@ -1,19 +1,22 @@
-<h1>Trips</h1>
+<div class="row">
+  <h1>Trips</h1>
+  <div class="column">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Trip</th>
+          <th></th>
+        </tr>
+      </thead>
 
-<table>
-  <thead>
-    <tr>
-      <th>Trip</th>
-      <th></th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @trips.each do |trip| %>
-    <tr>
-      <td>Trip <%= @trips.index(trip) + 1 %></td>
-      <td><%= link_to 'Show', trip, :class => 'button-xs' %></td>
-    </tr>
-    <% end %>
-  </tbody>
-</table>
+      <tbody>
+        <% @trips.each do |trip| %>
+        <tr>
+          <td>Trip <%= @trips.index(trip) + 1 %></td>
+          <td><%= link_to 'Show', trip, :class => 'button-xs' %></td>
+        </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

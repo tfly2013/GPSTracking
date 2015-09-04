@@ -1,5 +1,4 @@
 <h1>Editing Segment</h1>
-<%= link_to 'Back', @trip, :class => 'button-xs' %>
 <%= form_for @segment, url: trip_segment_path(@trip, @segment), method: :patch do |f| %>
   <p>
     <%= f.label :startLocation %><br>
