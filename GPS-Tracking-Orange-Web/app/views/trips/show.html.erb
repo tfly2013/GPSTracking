@@ -7,7 +7,8 @@
 
 <% @trip.segments.each do |segment| %>
 <p>Segment <%= @trip.segments.index(segment) + 1 %>
-<%= link_to 'Edit', edit_trip_segment_path(@trip, segment), :class => 'button-p' %></p>
+<%= link_to 'Edit', edit_trip_segment_path(@trip, segment), :class => 'button-p' %>
+<%= link_to 'Delete', trip_segment_path(@trip, segment), method: :delete, data: { confirm: 'Are you sure?'}, :class => 'button-p' %></p>
 <table border="1">
   <thead>
     <tr>
@@ -36,4 +37,5 @@ var coordinates = <%= raw @coordinates.to_json %>;
 $(initMap());
 </script>
 
+<%= link_to 'New', new_trip_segment_path(@trip), :class => 'button-p' %>
 <%= link_to 'Back', trips_path, :class => 'button-p' %>

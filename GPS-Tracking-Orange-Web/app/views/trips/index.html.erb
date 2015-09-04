@@ -5,16 +5,15 @@
     <tr>
       <th>Trip</th>
       <th></th>
-      <th></th>
     </tr>
   </thead>
 
   <tbody>
     <% @trips.each do |trip| %>
-      <tr>
-        <td>Trip <%= @trips.index(trip) + 1 %></td>
-        <td><%= link_to 'Show', trip, :class => 'button-xs' %></td>
-      </tr>
+    <tr>
+      <td>Trip <%= @trips.index(trip) + 1 %></td>
+      <td><%= link_to 'Show', trip, :class => 'button-xs' %></td>
+    </tr>
     <% end %>
   </tbody>
 </table>

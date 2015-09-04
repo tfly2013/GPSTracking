@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   resources :users
   # resources :trips, only: [:index, :create, :show, :edit, :update]
   resources :trips, only: [:index, :create, :show] do
-    resources :segments, only: [:edit, :update]
+    resources :segments
   end
   
   get 'reports', to: 'reports#index'
