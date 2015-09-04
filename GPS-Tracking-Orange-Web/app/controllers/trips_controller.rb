@@ -33,6 +33,7 @@ class TripsController < ApplicationController
 
   # GET /trips/1/edit
   def edit
+    @trip = Trip.find(params[:id])
   end
 
   # PATCH/PUT /trips/1
@@ -41,7 +42,7 @@ class TripsController < ApplicationController
     @trip = Trip.find(params[:id])
  
     if @trip.update(trip_params)
-      redirect_to @trip
+      redirect_to trips_path
     else
       render 'edit'
     end
@@ -57,6 +58,6 @@ class TripsController < ApplicationController
   end
 
   def trip_params
-    params.require(:trip).permit(:startLocation)
+    params.require(:trip).permit(:startLocation, :endLocation)
   end
 end

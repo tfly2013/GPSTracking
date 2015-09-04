@@ -3,17 +3,20 @@
 <table>
   <thead>
     <tr>
-      <th>Trip</th>
-      <th></th>
-      <th></th>
+      <th>Trip ID</th>
+      <th>startLocation</th>
+      <th>endLocation</th>
     </tr>
   </thead>
 
   <tbody>
     <% @trips.each do |trip| %>
       <tr>
-        <td>Trip <%= @trips.index(trip) + 1 %></td>
+        <td><%= trip.id %></td>
+        <td><%= trip.startLocation ? trip.startLocation : '-' %></td>
+        <td><%= trip.endLocation ? trip.endLocation : '-' %></td>
         <td><%= link_to 'Show', trip, :class => 'button-xs' %></td>
+        <td><%= link_to 'Edit', edit_trip_path(trip), :class => 'button-xs' %></td>
       </tr>
     <% end %>
   </tbody>
