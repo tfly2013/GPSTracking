@@ -2,6 +2,7 @@ class TripsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_trip, only: [:show, :edit, :update]
 
+  #API
   # POST /trips
   def create
     @trip = Trip.new
@@ -14,7 +15,10 @@ class TripsController < ApplicationController
       @location.time = Time.at(location_params[:time] / 1000)
       @location.save
     end
-    @segment.save
+    @trip = convert(@trip)
+    @trip.segments.each do |segment|
+      segment.save
+    end
     @trip.save
     render :status => 200, :json => { :success => true }
   end
@@ -44,7 +48,6 @@ class TripsController < ApplicationController
   # PATCH/PUT /trips/1.json
   def update
     @trip = Trip.find(params[:id])
-
     if @trip.update(trip_params)
       redirect_to trips_path
     else
@@ -53,6 +56,11 @@ class TripsController < ApplicationController
   end
 
   private
+  # Algorithm
+  def convert(trip)
+    return trip
+  end
+
   def set_trip
     @trip = current_user.trips.find(params[:id])
   end
