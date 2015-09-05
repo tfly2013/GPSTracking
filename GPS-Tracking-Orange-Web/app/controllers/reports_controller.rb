@@ -18,11 +18,20 @@ class ReportsController < ApplicationController
   end
 
   def average_distance(trips)
-    return 1000
+    distance = 0
+    trips.each do |trip|
+      distance += trip.distance
+    end
+    return distance.div(trips.length)
   end
 
   def average_speed(trips)
-    return 50
+    avgSpeed = 0
+    trips.each do |trip|
+      avgSpeed += trip.avgSpeed
+    end
+    return avgSpeed.fdiv(trips.length)
+
   end
 
   def modes_count(trips)
