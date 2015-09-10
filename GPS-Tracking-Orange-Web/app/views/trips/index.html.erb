@@ -1,11 +1,13 @@
+<div class="page-header">
+	<h1>Trips</h1>
+</div>
 <div class="row">
-  <h1>Trips</h1>
   <div class="column">
-    <table class="table">
+    <table class="table table-striped">
       <thead>
         <tr>
           <th>Trip</th>
-          <th></th>
+          <th>Action</th>
         </tr>
       </thead>
 
@@ -13,7 +15,7 @@
         <% @trips.each do |trip| %>
         <tr>
           <td>Trip <%= @trips.index(trip) + 1 %></td>
-          <td><%= link_to 'Show', trip, :class => 'button-xs' %></td>
+          <td><%= link_to 'Show', trip, :class =>  'btn btn-primary' %></td>
         </tr>
         <% end %>
       </tbody>

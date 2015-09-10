@@ -1,7 +1,6 @@
 class UsersController < ApplicationController
   before_action :authenticate_user!
   before_action :admin_only, :except => :show
-
   def index
     @users = User.all
   end
@@ -18,7 +17,7 @@ class UsersController < ApplicationController
 
   def update
     @user = User.find(params[:id])
-    if @user.update_attributes(secure_params)
+    if user_params[:role] >= 0 && user_params[:role] <= 2  && @user.update(user_params)
       redirect_to users_path, :notice => "User updated."
     else
       redirect_to users_path, :alert => "Unable to update user."
@@ -39,7 +38,7 @@ class UsersController < ApplicationController
     end
   end
 
-  def secure_params
+  def user_params
     params.require(:user).permit(:role)
   end
 

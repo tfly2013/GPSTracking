@@ -1,20 +1,37 @@
-<h1>Reports</h1>
-<h3>Average Distance: <%= @average_distance %> km</h3>
-<h3>Average Speed: <%= @average_speed %> km/h</h3>
-<h3>Transportation Modes:</h3>
-<table class="table">
-  <thead>
-    <tr>
-      <th>Mode</th>
-      <th>Count</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @modes.each do |mode, count| %>
-    <tr>
-      <td><%= mode %></td>
-      <td><%= count %></td>
-    </tr>
-    <% end %>
-  </tbody>
-</table>
+<div class="page-header">
+	<h1>Report</h1>
+</div>
+<div class="row">
+	<h3>Statistics:</h3>
+	<label class="col-sm-2">Average Distance:</label>
+	<div class="col-sm-10">
+		<%= @average_distance %> km
+	</div>
+</div>
+<div class="row">
+	<label class="col-sm-2">Average Speed:</label>
+	<div class="col-sm-10">
+		<%= @average_speed %> km/h
+	</div>
+</div>
+<div class="row">
+	<h3>Transportation Modes</h3>
+	<div class="column">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>Mode</th>
+					<th>Count</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% @modes.each do |mode, count| %>
+				<tr>
+					<td><%= mode %></td>
+					<td><%= count %></td>
+				</tr>
+				<% end %>
+			</tbody>
+		</table>
+	</div>
+</div>
