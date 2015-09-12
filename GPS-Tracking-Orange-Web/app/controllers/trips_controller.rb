@@ -1,6 +1,6 @@
 class TripsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_trip, only: [:show, :edit, :update]
+  before_action :set_trip, only: [:show, :update, :destroy]
 
   #API
   # POST /trips
@@ -38,20 +38,23 @@ class TripsController < ApplicationController
     end
   end
 
-  # GET /trips/1/edit
-  def edit
-    @trip = Trip.find(params[:id])
-  end
-
   # PATCH/PUT /trips/1
   # PATCH/PUT /trips/1.json
   def update
-    @trip = Trip.find(params[:id])
-    if @trip.update(trip_params)
-      redirect_to trips_path
-    else
-      render 'edit'
+    @trip.update(trip_params)
+    redirect_to trip_path(@trip)
+  end
+
+  # DELETE /trips/1
+  def destroy
+    @trip.segments.each do |seg|
+      seg.locations.each do |loc|
+        loc.destroy
+      end
+      seg.destroy
     end
+    @trip.destroy
+    redirect_to trips_path
   end
 
   private
@@ -87,7 +90,7 @@ class TripsController < ApplicationController
       i+=1
     end
   end
-  handle_asynchronously :snap_to_road
+  # handle_asynchronously :snap_to_road
 
   # Algorithm
   def convert(trip)
@@ -103,6 +106,6 @@ class TripsController < ApplicationController
   end
 
   def trip_params
-    params.require(:trip).permit(:startLocation, :endLocation)
+    params.require(:trip).permit(:segments_attributes => [:id, :transportation])
   end
 end

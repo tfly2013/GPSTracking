@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   devise_for :users
   resources :users
   # resources :trips, only: [:index, :create, :show, :edit, :update]
-  resources :trips, only: [:index, :create, :show] do
+  resources :trips, only: [:index, :create, :show, :update, :destroy] do
     resources :segments
   end
   
