@@ -17,8 +17,8 @@ function initMap(){
 	google.maps.event.addListenerOnce(map,"projection_changed", function() {
 		phaseCoordinates();
 		zoomToCoordinates();
-		addSegments();
-		addZones();	
+		drawSegments();
+		drawZones();	
 		snapZonesToSegments();
 	});
 }
@@ -28,17 +28,16 @@ function phaseCoordinates(){
 	if (coordinates.length == 0){
 		return;
 	}
-	var segId = coordinates[0].seg;
 	var segment = [];
+	segment.id = coordinates[0].seg;
 	for (var i = 0; i < coordinates.length ; i++){
 		var latlng = new google.maps.LatLng(
 			coordinates[i].lat,coordinates[i].lng);
-		latlng.seg = coordinates[i].seg;
-		if (segId != coordinates[i].seg){		
+		if (segment.id != coordinates[i].seg){		
 			segment.push(latlng);		
-			segId = coordinates[i].seg;
 			temp.push(segment);
 			segment = [];
+			segment.id = coordinates[i].seg;
 		}
 		segment.push(latlng);
 	}
@@ -55,7 +54,7 @@ function zoomToCoordinates(){
 	map.fitBounds(bounds);
 }
 
-function addSegments() {
+function drawSegments() {
 	for (var i = 0; i < coordinates.length; i++){
 		segment = new google.maps.Polyline({
 			path: coordinates[i],
@@ -63,8 +62,8 @@ function addSegments() {
 			strokeWeight: 5
 		});
 		segment.setMap(map);
-		segment.segId = coordinates[i][0].seg;
-
+		segment.segId = coordinates[i].id;
+		segment.id = i;
 		google.maps.event.addListener(segment, 'click', function(event) { 
 			var form = $(".seg-form-" + this.segId).clone().show()[0];
 			var infowindow = new google.maps.InfoWindow();
@@ -76,23 +75,30 @@ function addSegments() {
 	}
 }
 
-function addZones(){
-	for (var i = 0; i < coordinates.length; i++){
+function drawZones(){
+	// The start position
+	var zone = new google.maps.Marker({
+		position: coordinates[0][0]
+	});
+	zone.setMap(map);		
+	zone.segAfter = segments[0];
+	zones.push(zone);
+	// Transfer zones
+	for (var i = 1; i < coordinates.length; i++){
 		var zone = new google.maps.Marker({
 			position: coordinates[i][0],
 			draggable: true
 		});
 		zone.setMap(map);		
 		zone.segAfter = segments[i];
-		zone.segBefore = i > 0? segments[i - 1] : null;		
+		zone.segBefore = segments[i - 1];		
 		zones.push(zone);
 	}
-	// The last marker
+	// The end position
 	var i = coordinates.length - 1;
 	var j = coordinates[i].length -1;
 	var zone = new google.maps.Marker({
 		position: coordinates[i][j],
-		draggable: true
 	});
 	zone.setMap(map);		
 	zone.segBefore = segments[i];
@@ -101,8 +107,6 @@ function addZones(){
 
 
 function snapZonesToSegments(){
-	var zone = zones[0];
-	new SnapToRoute(map, zone, zone.segAfter);
 	for (var i = 1; i < zones.length - 1; i++){
 		zone = zones[i];
 		var before = zone.segBefore.getPath().getArray();
@@ -110,12 +114,43 @@ function snapZonesToSegments(){
 		mergedLine = new google.maps.Polyline({
 			path: before.concat(after)
 		});
-		new SnapToRoute(map, zone, mergedLine);
+		zone.str = new SnapToRoute(map, zone, mergedLine);
+		google.maps.event.addListener(zones[i], "dragend", function(){
+			updateSegments(this);
+		});
 	}
-	zone = zones[zones.length - 1];
-	new SnapToRoute(map, zone, zone.segBefore);
 }
 
+
+function updateSegments(zone){
+	var n = zone.str.getNthPoint();
+	var segment;
+	var before = false;
+	if (n > zone.segBefore.getPath().length){
+		n-= zone.segBefore.getPath().length;
+		segment = zone.segAfter;
+	}
+	else{
+		segment = zone.segBefore;
+		before = true;
+	}
+	var id = segment.id;
+	var latlng = zone.getPosition();
+	var removed;
+	if (before){
+		removed = coordinates[id].splice(n-1, coordinates[id].length - n, latlng);
+		coordinates[id+1] = removed.concat(coordinates[id+1]);
+		coordinates[id+1].unshift(latlng);
+	}
+	else{
+		removed = coordinates[id].splice(0, n, latlng);
+		coordinates[id-1] = coordinates[id-1].concat(removed);
+		coordinates[id-1].push(latlng);
+	}
+	for (var i = 0; i < coordinates.length; i++){
+		segments[i].setPath(coordinates[i]);
+	}
+}
 
 /** Snap to route library
 */
@@ -176,29 +211,17 @@ SnapToRoute.prototype.getClosestLatLng = function (latlng) {
 	return this.normalProj_.fromPointToLatLng(new google.maps.Point(r.x, r.y));
 };
 
-SnapToRoute.prototype.getDistAlongRoute = function (latlng) {
-	if (typeof (opt_latlng) === 'undefined') {
-		latlng = this.marker_.getLatLng();
-	}
+SnapToRoute.prototype.getNthPoint = function () {
+	latlng = this.marker_.getPosition();
 	var r = this.distanceToLines_(latlng);
-	return this.getDistToLine_(r.i, r.to);
-};
+	return r.i;
+}
 
 SnapToRoute.prototype.distanceToLines_ = function (mouseLatLng) {
 	var zoom = this.map_.getZoom();
 	var mousePx = this.normalProj_.fromLatLngToPoint(mouseLatLng);
 	var routePixels_ = this.routePixels_;
 	return this.getClosestPointOnLines_(mousePx, routePixels_);
-};
-
-SnapToRoute.prototype.getDistToLine_ = function (line, to) {
-	var routeOverlay = this.polyline_;
-	var d = 0;
-	for (var n = 1; n < line; n++) {
-		d += google.maps.geometry.spherical.computeDistanceBetween(routeOverlay.getAt(n - 1), routeOverlay.getAt(n));
-	}
-	d += google.maps.geometry.spherical.computeDistanceBetween(routeOverlay.getAt(line - 1), routeOverlay.getAt(line)) * to;
-	return d;
 };
 
 SnapToRoute.prototype.getClosestPointOnLines_ = function (pXy, aXys) {
