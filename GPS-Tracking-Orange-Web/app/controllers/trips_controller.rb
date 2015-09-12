@@ -80,7 +80,7 @@ class TripsController < ApplicationController
     i = 0
     data["snappedPoints"].each do |point|      
       index = point["originalIndex"]
-      while index > i || locations[i].accuracy > 200
+      while index > i
         locations[i].destroy
         i+=1
       end
