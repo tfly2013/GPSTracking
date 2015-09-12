@@ -1,6 +1,14 @@
-<h3>Profile</h3>
-<p>Email: <%= @user.email if @user.email %></p>
+<div class="page-header">
+	<h1>Profile</h1>
+</div>
+<div class="row">
+	<label class="col-sm-2">Email:</label>
+	<div class="col-sm-10">
+		<%= @user.email if @user.email %>
+	</div>
+</div>
 <% if @user == current_user %>
-<p><%= link_to 'Change Password', edit_user_registration_path, :class => 'button-p' %></p>
+<p>
+	<%= link_to 'Change Password', edit_user_registration_path, :class => 'btn btn-primary' %>
+</p>
 <% end %>
-<p><%= button_to "Cancel this account", registration_path(@user), data: { confirm: "Are you sure?" }, method: :delete, :class => 'button-p' %></p>
