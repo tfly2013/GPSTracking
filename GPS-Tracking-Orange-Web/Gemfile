@@ -4,7 +4,8 @@ gem 'devise'
 gem 'devise-bootstrap-views'
 gem 'simple_token_authentication'
 gem 'bootstrap-sass'
-gem 'dbscan'
+gem 'delayed_job_active_record'
+gem 'daemons'
 
 # Database
 gem 'pg'

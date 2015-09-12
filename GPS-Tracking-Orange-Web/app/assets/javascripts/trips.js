@@ -1,28 +1,53 @@
 // Place all the behaviors and hooks related to the matching controller here.
 // All this logic will automatically be available in application.js.
+debugger;
 
 var apiKey = 'AIzaSyA-10-w06yl2bTDNkIPGT0sD52X32pAyZE';
+var colours = ["red","orange","green","blue","purple"];
 var snappedCoordinates  = [];
-var markers = [];
+var zones = [];
+var trip = [];
 var map;
-var trip;
 
 function initMap(){
 	map = new google.maps.Map(document.getElementById('map'), {
 		zoom: 12,
 		center: {lat: -37.7962972, lng: 144.961397}
 	});
+	phaseCoordinates();
 	zoomToCoordinates();
-	addMarkers();
-	snapToRoad();
+	addPolyline();
+	addMarkers();		
 }
 
-function zoomToCoordinates(){
-	var bounds = new google.maps.LatLngBounds();
+function phaseCoordinates(){	
+	var temp = [];
+	if (coordinates.length == 0){
+		return;
+	}
+	var segId = coordinates[0].seg;
+	var segment = [];
 	for (var i = 0; i < coordinates.length ; i++){
 		var latlng = new google.maps.LatLng(
 			coordinates[i].lat,coordinates[i].lng);
-		bounds.extend(latlng);
+		latlng['seg'] = coordinates[i].seg;
+		if (segId != coordinates[i].seg){		
+			segment.push(latlng);		
+			segId = coordinates[i].seg;
+			temp.push(segment);
+			segment = [];
+		}
+		segment.push(latlng);
+	}
+	temp.push(segment);
+	coordinates = temp;	
+}
+
+function zoomToCoordinates(){	
+	var bounds = new google.maps.LatLngBounds();
+	for (var i = 0; i < coordinates.length ; i++){
+		for (var j = 0; j < coordinates[i].length; j++)
+			bounds.extend(coordinates[i][j]);
 	}
 	map.fitBounds(bounds);
 }
@@ -30,52 +55,41 @@ function zoomToCoordinates(){
 function addMarkers(){
 	for (var i = 0; i < coordinates.length; i++){
 		var marker = new google.maps.Marker({
-			position: coordinates[i],
-			draggable: true
+			position: coordinates[i][0]
 		});
-		marker.setMap(map);
+		marker.setMap(map);		
 		marker['id'] = i;
-		google.maps.event.addListener(marker, 'dragend', function() { 
-			trip.setMap(null);
-			position = this.getPosition();
-			coordinates[this['id']] = {lat: position.lat(), lng: position.lng()};
-			snapToRoad();
-		});
-		markers.push(marker);
+		zones.push(marker);
 	}
-	var markerCluster = new MarkerClusterer(map, markers, {gridSize: 15, maxZoom: 17, minimumClusterSize: 5});
+	// The last marker
+	var i = coordinates.length - 1;
+	var j = coordinates[i].length -1;
+	var marker = new google.maps.Marker({
+		position: coordinates[i][j]
+	});
+	marker.setMap(map);		
+	marker['id'] = i + 1;
+	zones.push(marker);
 }
 
-function snapToRoad() {
-	var pathValues = [];
+
+function addPolyline() {
 	for (var i = 0; i < coordinates.length; i++){
-		pathValues.push(coordinates[i].lat + "," + coordinates[i].lng);
-	}
-	$.get('https://roads.googleapis.com/v1/snapToRoads', {
-		interpolate : true,
-		key : apiKey,
-		path : pathValues.join('|')
-	}, function(data) {
-		processSnapToRoadResponse(data);
-		drawSnappedPolyline();
-	});
-}
+		segment = new google.maps.Polyline({
+			path: coordinates[i],
+			strokeColor: colours[i%colours.length],
+			strokeWeight: 5
+		});
+		segment.setMap(map);
+		segment['seg'] = coordinates[i][0]['seg'];
 
-function processSnapToRoadResponse(data) {
-	snappedCoordinates = [];
-	for (var i = 0; i < data.snappedPoints.length; i++) {
-		var latlng = new google.maps.LatLng(
-			data.snappedPoints[i].location.latitude,
-			data.snappedPoints[i].location.longitude);
-		snappedCoordinates.push(latlng);
+		google.maps.event.addListener(segment, 'click', function(event) { 
+			var form = $(".seg-form-" + this['seg']).clone().show()[0];
+			var infowindow = new google.maps.InfoWindow();
+			infowindow.setContent(form);
+			infowindow.setPosition(event.latLng);
+			infowindow.open(map);
+		});
+		trip.push(segment);
 	}
-}
-
-function drawSnappedPolyline() {
-	trip = new google.maps.Polyline({
-		path: snappedCoordinates,
-		strokeColor: 'black',
-		strokeWeight: 3
-	});
-	trip.setMap(map);
 }
