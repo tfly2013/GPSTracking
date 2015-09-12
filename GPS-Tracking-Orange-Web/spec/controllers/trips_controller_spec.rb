@@ -37,123 +37,258 @@ RSpec.describe TripsController, type: :controller do
   let(:valid_session) { {} }
 
   describe "GET #index" do
-    it "assigns all trips as @trips" do
-      trip = Trip.create! valid_attributes
-      get :index, {}, valid_session
-      expect(assigns(:trips)).to eq([trip])
+    it "sign in as user get all trips as @trips" do
+      @request.headers["Accept"] = "application/json"
+      @request.env["CONTENT_TYPE"] = "application/json"
+      user=login_user
+      trip = Trip.find_by(user: user.id)
+      # get :index, {}, valid_session
+      expect(assigns(:trips)).to eq(trip)
     end
   end
 
   describe "GET #show" do
     it "assigns the requested trip as @trip" do
-      trip = Trip.create! valid_attributes
-      get :show, {:id => trip.to_param}, valid_session
-      expect(assigns(:trip)).to eq(trip)
+      user = login_user
+      my_trip = build_trip(user.id)
+      # server_response = get "/trips/#{my_trip.id}"
+       # server_response = get "/trips/new"
+      # server_response = get :show, {:id => my_trip.id}
+      expect(:get => "/trips/#{my_trip.id}").to route_to("trips#show", :id => "#{my_trip.id}")
+      expect(response).to have_http_status(200)
+      expect(response).to be_success
+      expect(assigns(:trip)).to eq(my_trip)
+
     end
   end
 
-  describe "GET #new" do
-    it "assigns a new trip as @trip" do
-      get :new, {}, valid_session
-      expect(assigns(:trip)).to be_a_new(Trip)
-    end
-  end
+  # describe "GET #new" do
+  #   it "assigns a new trip as @trip" do
+  #     get :new, {}, valid_session
+  #     expect(assigns(:trip)).to be_a_new(Trip)
+  #   end
+  # end
 
   describe "GET #edit" do
     it "assigns the requested trip as @trip" do
-      trip = Trip.create! valid_attributes
-      get :edit, {:id => trip.to_param}, valid_session
-      expect(assigns(:trip)).to eq(trip)
+      pending("there is no routing match this routing")
+      user = login_user
+      my_trip = build_trip(user.id)
+      get :edit, {:id => my_trip.id}
+      expect(response).to have_http_status(200)
+      expect(response).to be_success
+      expect(assigns(:trip)).to eq(my_trip)
     end
   end
 
   describe "POST #create" do
     context "with valid params" do
-      it "creates a new Trip" do
-        expect {
-          post :create, {:trip => valid_attributes}, valid_session
-        }.to change(Trip, :count).by(1)
+
+       it "sign in as user creates a new Trip" do
+      @request.headers["Accept"] = "application/json"
+      @request.env["CONTENT_TYPE"] = "application/json"
+      user=login_user
+      post :create , 
+              {  format: :json,
+               :locations =>  [ 
+                
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456867 },
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456868 },
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456869 },
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456860 },
+                ]
+              }, as: :json
+
+      json = JSON.parse response.body
+      expect(response).to have_http_status(200)
+      expect(response).to be_success
+      expect(json['success']).to eq(true)
+      trip=Trip.find_by(user: user.id)
+      expect(trip).not_to be_nil
+      segment=Segment.find_by(trip: trip.id)
+      expect(segment).not_to be_nil
+      test_locations=Location.where(segment: segment.id)
+      expect(test_locations.length).to eq(4)
       end
 
-      it "assigns a newly created trip as @trip" do
-        post :create, {:trip => valid_attributes}, valid_session
-        expect(assigns(:trip)).to be_a(Trip)
-        expect(assigns(:trip)).to be_persisted
+
+      # it "sign in as user creates a new Trip no response" do
+      # @request.headers["Accept"] = "application/json"
+      # @request.env["CONTENT_TYPE"] = "application/json"
+      # user=login_user
+      # post :create , 
+      #         {  format: :json,
+      #          :locations =>  [ 
+                
+      #         {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456867 },
+      #         {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456868 },
+      #         {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456869 },
+      #         {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456860 },
+      #           ]
+      #         }, as: :json
+
+      # json = JSON.parse response.body
+      # expect(response).to have_http_status(200)
+      # expect(response).to be_success
+      # expect(json['success']).to eq(true)
+      # trip=Trip.find_by(user: user.id)
+      # expect(trip).not_to be_nil
+      # segment=Segment.find_by(trip: trip.id)
+      # expect(segment).not_to be_nil
+      # test_locations=Location.where(segment: segment.id)
+      # expect(test_locations.length).to eq(4)
+      # end
+
+      it "sign in as admin creates a new Trip" do
+      @request.headers["Accept"] = "application/json"
+      @request.env["CONTENT_TYPE"] = "application/json"
+      user=login_admin
+      post :create , 
+              {  format: :json,
+               :locations =>  [ 
+                
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456867 },
+                ]
+              }, as: :json
+
+      json = JSON.parse response.body
+      expect(response).to have_http_status(200)
+      expect(response).to be_success
+      expect(json['success']).to eq(true)
+      trip=Trip.find_by(user: user.id)
+      expect(trip).not_to be_nil
+      segment=Segment.find_by(trip: trip.id)
+      expect(segment).not_to be_nil
+      test_locations=Location.where(segment: segment.id)
+      expect(test_locations.length).to eq(1)
       end
 
-      it "redirects to the created trip" do
-        post :create, {:trip => valid_attributes}, valid_session
-        expect(response).to redirect_to(Trip.last)
+
+      it "sign in as researcher creates a new Trip" do
+      @request.headers["Accept"] = "application/json"
+      @request.env["CONTENT_TYPE"] = "application/json"
+      user=login_researcher
+      post :create , 
+              {  format: :json,
+               :locations =>  [ 
+                
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456867 },
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456868 },
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456869 },
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456860 },
+                ]
+              }, as: :json
+
+      json = JSON.parse response.body
+      expect(response).to have_http_status(200)
+      expect(response).to be_success
+      expect(json['success']).to eq(true)
+      trip=Trip.find_by(user: user.id)
+      expect(trip).not_to be_nil
+      segment=Segment.find_by(trip: trip.id)
+      expect(segment).not_to be_nil
+      test_locations=Location.where(segment: segment.id)
+      expect(test_locations.length).to eq(4)
       end
+
     end
 
     context "with invalid params" do
-      it "assigns a newly created but unsaved trip as @trip" do
-        post :create, {:trip => invalid_attributes}, valid_session
-        expect(assigns(:trip)).to be_a_new(Trip)
+
+      it "did not sign in can not create" do
+      @request.headers["Accept"] = "application/json"
+      @request.env["CONTENT_TYPE"] = "application/json"
+     
+        post :create , 
+              {  format: :json,
+               :locations =>  [ 
+              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456867 },
+                ]
+            }, as: :json
+
+      expect(response).to have_http_status(401)
+      expect(response).not_to be_success
+
       end
 
-      it "re-renders the 'new' template" do
-        post :create, {:trip => invalid_attributes}, valid_session
-        expect(response).to render_template("new")
+
+       it "sign in as user cannot create a trip without locations" do
+      @request.headers["Accept"] = "application/json"
+      @request.env["CONTENT_TYPE"] = "application/json"
+      user=login_user
+      expect {post :create , 
+              {  format: :json,
+               :locations =>  [ 
+                ]
+              }, as: :json
+              }.to raise_error(ActionController::ParameterMissing)
       end
+      # it "assigns a newly created but unsaved trip as @trip" do
+      #   post :create, {:trip => invalid_attributes}, valid_session
+      #   expect(assigns(:trip)).to be_a_new(Trip)
+      # end
+
+      # it "re-renders the 'new' template" do
+      #   post :create, {:trip => invalid_attributes}, valid_session
+      #   expect(response).to render_template("new")
+      # end
     end
   end
 
-  describe "PUT #update" do
-    context "with valid params" do
-      let(:new_attributes) {
-        skip("Add a hash of attributes valid for your model")
-      }
+  # describe "PUT #update" do
+  #   context "with valid params" do
+  #     let(:new_attributes) {
+  #       skip("Add a hash of attributes valid for your model")
+  #     }
 
-      it "updates the requested trip" do
-        trip = Trip.create! valid_attributes
-        put :update, {:id => trip.to_param, :trip => new_attributes}, valid_session
-        trip.reload
-        skip("Add assertions for updated state")
-      end
+  #     it "updates the requested trip" do
+  #       trip = Trip.create! valid_attributes
+  #       put :update, {:id => trip.to_param, :trip => new_attributes}, valid_session
+  #       trip.reload
+  #       skip("Add assertions for updated state")
+  #     end
 
-      it "assigns the requested trip as @trip" do
-        trip = Trip.create! valid_attributes
-        put :update, {:id => trip.to_param, :trip => valid_attributes}, valid_session
-        expect(assigns(:trip)).to eq(trip)
-      end
+  #     it "assigns the requested trip as @trip" do
+  #       trip = Trip.create! valid_attributes
+  #       put :update, {:id => trip.to_param, :trip => valid_attributes}, valid_session
+  #       expect(assigns(:trip)).to eq(trip)
+  #     end
 
-      it "redirects to the trip" do
-        trip = Trip.create! valid_attributes
-        put :update, {:id => trip.to_param, :trip => valid_attributes}, valid_session
-        expect(response).to redirect_to(trip)
-      end
-    end
+  #     it "redirects to the trip" do
+  #       trip = Trip.create! valid_attributes
+  #       put :update, {:id => trip.to_param, :trip => valid_attributes}, valid_session
+  #       expect(response).to redirect_to(trip)
+  #     end
+  #   end
 
-    context "with invalid params" do
-      it "assigns the trip as @trip" do
-        trip = Trip.create! valid_attributes
-        put :update, {:id => trip.to_param, :trip => invalid_attributes}, valid_session
-        expect(assigns(:trip)).to eq(trip)
-      end
+  #   context "with invalid params" do
+  #     it "assigns the trip as @trip" do
+  #       trip = Trip.create! valid_attributes
+  #       put :update, {:id => trip.to_param, :trip => invalid_attributes}, valid_session
+  #       expect(assigns(:trip)).to eq(trip)
+  #     end
 
-      it "re-renders the 'edit' template" do
-        trip = Trip.create! valid_attributes
-        put :update, {:id => trip.to_param, :trip => invalid_attributes}, valid_session
-        expect(response).to render_template("edit")
-      end
-    end
-  end
+  #     it "re-renders the 'edit' template" do
+  #       trip = Trip.create! valid_attributes
+  #       put :update, {:id => trip.to_param, :trip => invalid_attributes}, valid_session
+  #       expect(response).to render_template("edit")
+  #     end
+  #   end
+  # end
 
-  describe "DELETE #destroy" do
-    it "destroys the requested trip" do
-      trip = Trip.create! valid_attributes
-      expect {
-        delete :destroy, {:id => trip.to_param}, valid_session
-      }.to change(Trip, :count).by(-1)
-    end
+  # describe "DELETE #destroy" do
+  #   it "destroys the requested trip" do
+  #     trip = Trip.create! valid_attributes
+  #     expect {
+  #       delete :destroy, {:id => trip.to_param}, valid_session
+  #     }.to change(Trip, :count).by(-1)
+  #   end
 
-    it "redirects to the trips list" do
-      trip = Trip.create! valid_attributes
-      delete :destroy, {:id => trip.to_param}, valid_session
-      expect(response).to redirect_to(trips_url)
-    end
-  end
+  #   it "redirects to the trips list" do
+  #     trip = Trip.create! valid_attributes
+  #     delete :destroy, {:id => trip.to_param}, valid_session
+  #     expect(response).to redirect_to(trips_url)
+  #   end
+  # end
 
 end
