@@ -33,6 +33,7 @@ function phaseCoordinates(){
 	for (var i = 0; i < coordinates.length ; i++){
 		var latlng = new google.maps.LatLng(
 			coordinates[i].lat,coordinates[i].lng);
+		latlng.id = i;
 		if (segment.id != coordinates[i].seg){		
 			segment.push(latlng);		
 			temp.push(segment);
@@ -80,8 +81,10 @@ function drawZones(){
 	var zone = new google.maps.Marker({
 		position: coordinates[0][0]
 	});
-	zone.setMap(map);		
+	zone.setMap(map);	
+	zone.id = 0;	
 	zone.segAfter = segments[0];
+	zone.fixed = true;	
 	zones.push(zone);
 	// Transfer zones
 	for (var i = 1; i < coordinates.length; i++){
@@ -89,9 +92,11 @@ function drawZones(){
 			position: coordinates[i][0],
 			draggable: true
 		});
-		zone.setMap(map);		
+		zone.setMap(map);	
+		zone.id = i;	
 		zone.segAfter = segments[i];
-		zone.segBefore = segments[i - 1];		
+		zone.segBefore = segments[i - 1];
+		zone.fixed = false;
 		zones.push(zone);
 	}
 	// The end position
@@ -100,8 +105,10 @@ function drawZones(){
 	var zone = new google.maps.Marker({
 		position: coordinates[i][j],
 	});
-	zone.setMap(map);		
+	zone.setMap(map);	
+	zone.id = i;	
 	zone.segBefore = segments[i];
+	zone.fixed = true;
 	zones.push(zone);	
 }
 
@@ -111,10 +118,13 @@ function snapZonesToSegments(){
 		zone = zones[i];
 		var before = zone.segBefore.getPath().getArray();
 		var after = zone.segAfter.getPath().getArray();
-		mergedLine = new google.maps.Polyline({
+		merged = new google.maps.Polyline({
 			path: before.concat(after)
 		});
-		zone.str = new SnapToRoute(map, zone, mergedLine);
+		zone.str = new SnapToRoute(map, zone, merged);
+		google.maps.event.addListener(zones[i], "drag", function(){
+			updateSegments(this);
+		});
 		google.maps.event.addListener(zones[i], "dragend", function(){
 			updateSegments(this);
 		});
@@ -123,7 +133,7 @@ function snapZonesToSegments(){
 
 
 function updateSegments(zone){
-	var n = zone.str.getNthPoint();
+	var n = zone.str.getPointPosition();
 	var segment;
 	var before = false;
 	if (n > zone.segBefore.getPath().length){
@@ -138,21 +148,42 @@ function updateSegments(zone){
 	var latlng = zone.getPosition();
 	var removed;
 	if (before){
-		removed = coordinates[id].splice(n-1, coordinates[id].length - n, latlng);
+		coordinates[id].pop();
+		removed = coordinates[id].splice(n, coordinates[id].length-n, latlng);
+		if (coordinates[id+1][0].id == null){
+			coordinates[id+1].shift();
+		}
 		coordinates[id+1] = removed.concat(coordinates[id+1]);
 		coordinates[id+1].unshift(latlng);
+		segments[id].setPath(coordinates[id]);
+		segments[id+1].setPath(coordinates[id+1]);
 	}
 	else{
+		coordinates[id].shift();
 		removed = coordinates[id].splice(0, n, latlng);
+		if (coordinates[id-1][coordinates[id-1].length - 1].id == null){
+			coordinates[id-1].pop();
+		}
 		coordinates[id-1] = coordinates[id-1].concat(removed);
-		coordinates[id-1].push(latlng);
+		coordinates[id-1].push(latlng);		
+		segments[id].setPath(coordinates[id]);
+		segments[id-1].setPath(coordinates[id-1]);
 	}
-	for (var i = 0; i < coordinates.length; i++){
-		segments[i].setPath(coordinates[i]);
-	}
+
+	updateStr(zones[zone.id - 1]);
+	updateStr(zones[zone.id + 1]);
 }
 
-/** Snap to route library
+function updateStr(zone){
+	if (zone.fixed)
+		return;	
+	var before = zone.segBefore.getPath().getArray();
+	var after = zone.segAfter.getPath().getArray();
+	zone.str.updateLine(before.concat(after));
+}
+
+/** 
+*	Modified Snap to route library
 */
 function SnapToRoute(map, marker, polyline) {
 	this.routePixels_ = [];
@@ -172,6 +203,11 @@ SnapToRoute.prototype.init_ = function () {
 SnapToRoute.prototype.updateTargets = function (marker, polyline) {
 	this.marker_ = marker || this.marker_;
 	this.polyline_ = polyline || this.polyline_;
+	this.loadLineData_();
+};
+
+SnapToRoute.prototype.updateLine = function (path) {
+	this.polyline_.setPath(path);
 	this.loadLineData_();
 };
 
@@ -211,7 +247,7 @@ SnapToRoute.prototype.getClosestLatLng = function (latlng) {
 	return this.normalProj_.fromPointToLatLng(new google.maps.Point(r.x, r.y));
 };
 
-SnapToRoute.prototype.getNthPoint = function () {
+SnapToRoute.prototype.getPointPosition = function () {
 	latlng = this.marker_.getPosition();
 	var r = this.distanceToLines_(latlng);
 	return r.i;
