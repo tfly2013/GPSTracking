@@ -31,10 +31,13 @@ class TripsController < ApplicationController
   # GET /trips/1
   # GET /trips/1.json
   def show
-    @coordinates = []
-    locations = @trip.locations.sort
-    locations.each do |location|
-      @coordinates << {:lat => location.latitude, :lng => location.longitude, :seg => location.segment.id }
+    @tripJson = []
+    @trip.segments.sort.each do |segment|
+      locations = []
+      segment.locations.sort.each do |location|
+        locations << {:id => location.id, :lat => location.latitude, :lng => location.longitude }
+      end
+      @tripJson << {:id => segment.id, :transportation => segment.transportation, :locations => locations}
     end
   end
 
@@ -42,7 +45,7 @@ class TripsController < ApplicationController
   # PATCH/PUT /trips/1.json
   def update
     @trip.update(trip_params)
-    redirect_to trip_path(@trip)
+    redirect_to trip_path(@trip), :notice => "Trip saved."
   end
 
   # DELETE /trips/1
@@ -54,7 +57,7 @@ class TripsController < ApplicationController
       seg.destroy
     end
     @trip.destroy
-    redirect_to trips_path
+    redirect_to trips_path, :notice => "Trip deleted."
   end
 
   private
@@ -106,6 +109,6 @@ class TripsController < ApplicationController
   end
 
   def trip_params
-    params.require(:trip).permit(:segments_attributes => [:id, :transportation])
+    params.require(:trip).permit(:segments => [:id, :transportation, :locations => [:id, :latitude, :longitude]])
   end
 end

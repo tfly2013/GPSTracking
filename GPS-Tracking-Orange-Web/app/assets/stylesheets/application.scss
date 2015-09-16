@@ -16,22 +16,10 @@
  @import "jquery-ui/core";
  @import "jquery-ui/accordion";
  @import "jquery-ui-bootstrap";
- 
- //Map
- .map-container{
-  width: 100%;
-}
-#map {
-  width: 100%;
-  height: 600px;
-}
-#map-control {
-  width: 240px;
-  background-color: rgba(255, 255, 255, 0.8);
-  margin: 8px;
-  padding: 4px;
-  border-radius: 4px;
-}
+ @import "home";
+ @import "trips";
+ @import "reports"; 
+
 // make all images responsive by default
 img {
   @extend .img-responsive;

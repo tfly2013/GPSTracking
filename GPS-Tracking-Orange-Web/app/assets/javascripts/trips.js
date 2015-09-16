@@ -21,9 +21,9 @@ function initMap(){
 	map.controls[google.maps.ControlPosition.RIGHT_TOP].push(
 		document.getElementById('map-control'));
 	google.maps.event.addListenerOnce(map,"projection_changed", function() {
-		phaseCoordinates();
-		addSegmentsToAccordion();
+		phaseTrip();
 		zoomToTrip();
+		addSegmentsToAccordion();		
 		//testMarkers();
 		drawSegments();
 		drawZones();	
@@ -32,50 +32,63 @@ function initMap(){
 }
 
 /*** 
-* Phase coordinates into 2D array
-* coordinates: 2D array of google map LatLng object
-* coordinates[i]: coordinates for a segement
+* Phase locations in trip into google map LatLng object
 */
-function phaseCoordinates(){		
-	var temp = [];
-	if (coordinates.length == 0){
-		return;
-	}
-	var segment = [];
-	segment.id = coordinates[0].seg;
-	for (var i = 0; i < coordinates.length ; i++){
-		var latlng = new google.maps.LatLng(
-			coordinates[i].lat,coordinates[i].lng);
-		latlng.id = i;
-		// coordinates has been sorted, so same coordinate with segment would stay together.
-		// new segment is created if incoming location has a different segement id.
-		if (segment.id != coordinates[i].seg){		
-			segment.push(latlng);		
-			temp.push(segment);
-			segment = [];
-			segment.id = coordinates[i].seg;
+function phaseTrip(){		
+	if (trip.length == 0)
+		return;	
+	for (var i = 0; i < trip.length ; i++){
+		var segment = [];
+		segment.id = trip[i].id;
+		segment.transportation = trip[i].transportation;
+		for (var j = 0; j < trip[i].locations.length; j++){
+			var latlng = new google.maps.LatLng(
+				trip[i].locations[j].lat,trip[i].locations[j].lng);
+			latlng.id = trip[i].locations[j].id;
+			if (j == 0 && i > 0){
+				trip[i-1].push(latlng);
+			}
+			segment.push(latlng);
 		}
-		segment.push(latlng);
+		trip[i] = segment;
 	}
-	temp.push(segment);
-	coordinates = temp;	
+}
+
+/*** 
+* Zoom the map to show the trip
+*/
+function zoomToTrip(){	
+	var bounds = new google.maps.LatLngBounds();
+	for (var i = 0; i < trip.length ; i++){
+		for (var j = 0; j < trip[i].length; j++)
+			bounds.extend(trip[i][j]);
+	}
+	map.fitBounds(bounds);
 }
 
 function addSegmentsToAccordion(){
-	for (var i = 0; i < coordinates.length ; i++){
+	for (var i = 0; i < trip.length ; i++){
 		$("#accordion")
-		.append("<h3>Segment " + (i + 1) + "</h3>" +
+		.append("<h3 id="+ i +">Segment " + (i + 1) + "</h3>" +
 			"<div><label class='control-label'>Transportation</label>" +
-			"<input type='text' name='transportation' class='form-control'/></div>");
+			"<input type='text' id=transportation-"+ i +
+			" class='form-control' value="+ trip[i].transportation +" /></div>");
 	}
 	$("#accordion").accordion({
 		collapsible: true,
-		active: false
+		active: false,
+		heightStyle: "content",
+		activate: function( event, ui ) {
+			var id;
+			if (ui.newHeader.length > 0)
+				id = ui.newHeader[0].id;			
+			selectSegment(id);
+		}
 	});
 }
 
 function selectSegment(id){
-	if (id == -1){
+	if (id == null){
 		selected = null;
 		for (var i = 0; i < segments.length ; i++)
 			segments[i].setOptions({
@@ -95,43 +108,31 @@ function selectSegment(id){
 }
 
 /*** 
-* Zoom the map to show the trip
-*/
-function zoomToTrip(){	
-	var bounds = new google.maps.LatLngBounds();
-	for (var i = 0; i < coordinates.length ; i++){
-		for (var j = 0; j < coordinates[i].length; j++)
-			bounds.extend(coordinates[i][j]);
-	}
-	map.fitBounds(bounds);
-}
-
-/*** 
 * Draw each segement (polyline)
 */
 function drawSegments() {	
-	for (var i = 0; i < coordinates.length; i++){
+	for (var i = 0; i < trip.length; i++){
 		segment = new google.maps.Polyline({
-			path: coordinates[i],
+			path: trip[i],
 			strokeColor: colours[i%colours.length],
 			strokeWeight: 5
 		});
 		segment.setMap(map);
-		segment.segId = coordinates[i].id;
+		segment.segId = trip[i].id;
 		segment.id = i;
 		segments.push(segment);
 	}
 }
 
 function testMarkers(){
-	for (var i = 0; i < coordinates.length ; i++){
-		for (var j = 0; j < coordinates[i].length; j++){
+	for (var i = 0; i < trip.length ; i++){
+		for (var j = 0; j < trip[i].length; j++){
 			var marker = new google.maps.Marker({
-				position: coordinates[i][j],
+				position: trip[i][j],
 				opacity: 0.3
 			});
 			marker.setMap(map);
-			marker.pid = coordinates[i][j].id;
+			marker.pid = trip[i][j].id;
 			google.maps.event.addListener(marker, "click", function(){
 				console.log(this.pid);
 			});
@@ -145,7 +146,7 @@ function testMarkers(){
 function drawZones(){
 	// The start position
 	var zone = new google.maps.Marker({
-		position: coordinates[0][0]
+		position: trip[0][0]
 	});
 	zone.setMap(map);	
 	zone.id = 0;	
@@ -153,9 +154,9 @@ function drawZones(){
 	zone.fixed = true;	
 	zones.push(zone);
 	// Transfer zones
-	for (var i = 1; i < coordinates.length; i++){
+	for (var i = 1; i < trip.length; i++){
 		var zone = new google.maps.Marker({
-			position: coordinates[i][0],
+			position: trip[i][0],
 			draggable: true
 		});
 		zone.setMap(map);	
@@ -166,10 +167,10 @@ function drawZones(){
 		zones.push(zone);
 	}
 	// The end position
-	var i = coordinates.length - 1;
-	var j = coordinates[i].length -1;
+	var i = trip.length - 1;
+	var j = trip[i].length -1;
 	var zone = new google.maps.Marker({
-		position: coordinates[i][j]
+		position: trip[i][j]
 	});
 	zone.setMap(map);	
 	zone.id = i;	
@@ -221,35 +222,35 @@ function updateSegments(zone){
 	var removed;
 	if (before){
 		// remove the last point of segBefore (which is same as the first point of segAfter)
-		coordinates[id].pop();
+		trip[id].pop();
 		// rmeove points from the end of segBefore, add current zone point at last
-		removed = coordinates[id].splice(n, coordinates[id].length-n, latlng);
+		removed = trip[id].splice(n, trip[id].length-n, latlng);
 		// remove the first point of segAfter, if it's a new point(no id), 
 		// which mean it was inserted by last zone move
-		if (coordinates[id+1][0].id == null){
-			coordinates[id+1].shift();
+		if (trip[id+1][0].id == null){
+			trip[id+1].shift();
 		}
 		// add removed points to segAfter
-		coordinates[id+1] = removed.concat(coordinates[id+1]);
+		trip[id+1] = removed.concat(trip[id+1]);
 		// insert current zone point at the beginning of segAfter
-		coordinates[id+1].unshift(latlng);
+		trip[id+1].unshift(latlng);
 		// update both segments
-		segments[id].setPath(coordinates[id]);
-		segments[id+1].setPath(coordinates[id+1]);
+		segments[id].setPath(trip[id]);
+		segments[id+1].setPath(trip[id+1]);
 	}
 	else{
 		// similar to before
-		coordinates[id].shift();
-		removed = coordinates[id].splice(0, n, latlng);
-		if (coordinates[id-1][coordinates[id-1].length - 1].id == null){
-			coordinates[id-1].pop();
+		trip[id].shift();
+		removed = trip[id].splice(0, n, latlng);
+		if (trip[id-1][trip[id-1].length - 1].id == null){
+			trip[id-1].pop();
 		}
-		coordinates[id-1] = coordinates[id-1].concat(removed);
-		coordinates[id-1].push(latlng);		
-		segments[id].setPath(coordinates[id]);
-		segments[id-1].setPath(coordinates[id-1]);
-		console.log(coordinates[id-1]);
-		console.log(coordinates[id]);
+		trip[id-1] = trip[id-1].concat(removed);
+		trip[id-1].push(latlng);		
+		segments[id].setPath(trip[id]);
+		segments[id-1].setPath(trip[id-1]);
+		console.log(trip[id-1]);
+		console.log(trip[id]);
 	}
 
 	// update the moving range of zone before and zone after
@@ -266,6 +267,32 @@ function updateStr(zone){
 	var after = zone.segAfter.getPath().getArray();
 	zone.str.updateLine(before.concat(after));
 }
+
+
+function saveTrip(){
+	var tripData = {};
+	var segments = [];
+	for (var i = 0; i < trip.length; i++){
+		var segment = {};
+		segment.id = trip[i].id;
+		segment.transportation = $("#transportation-" + i)[0].value;
+		var locations = []
+		// The last point is the repeat of the first point of next segment
+		for (var j = 0; j < trip[i].length - 1; j++){
+			var location = {};
+			if (trip[i][j].id != null)
+				location.id = trip[i][j].id;
+			location.latitude = trip[i][j].lat();
+			location.longitude = trip[i][j].lng();
+			locations.push(location);
+		}
+		segment.locations = locations;
+		segments.push(segment);
+	}
+	tripData.segments = segments;
+	console.log(tripData);
+}
+
 
 /** 
  * Modified Snap to route library

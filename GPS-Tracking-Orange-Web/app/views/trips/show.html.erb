@@ -34,14 +34,14 @@
   <%= link_to 'Back', trips_path, :class => 'btn btn-info' %>
 </div> -->
 <div id="map-control">
+  <h4>Trip</h4>
   <div role="form">
-    <label class="control-label" >Segments</label>
     <div id="accordion"></div>
     <br />
-    <button class="btn btn-primary">Save Trip</button>
+    <button class="btn btn-primary btn-sm" onclick="saveTrip()">Save Trip</button>
   </div>
 </div>
 <script type="text/javascript">
-  var coordinates =<%= raw @coordinates.to_json %>;
+  var trip =<%= raw @tripJson.to_json %>;
   $(initMap());
 </script>
