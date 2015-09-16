@@ -2,11 +2,10 @@
 // All this logic will automatically be available in application.js.
 debugger;
 
-var apiKey = 'AIzaSyA-10-w06yl2bTDNkIPGT0sD52X32pAyZE';
 var colours = ["red","orange","green","blue","purple"];
-var snappedCoordinates  = [];
 var zones = [];
 var segments = [];
+var selected;
 var map;
 
 /***
@@ -17,9 +16,15 @@ function initMap(){
 		zoom: 12,
 		center: {lat: -37.7962972, lng: 144.961397}
 	});
+	zones = [];
+	segments = [];
+	map.controls[google.maps.ControlPosition.RIGHT_TOP].push(
+		document.getElementById('map-control'));
 	google.maps.event.addListenerOnce(map,"projection_changed", function() {
 		phaseCoordinates();
-		zoomToCoordinates();
+		addSegmentsToAccordion();
+		zoomToTrip();
+		//testMarkers();
 		drawSegments();
 		drawZones();	
 		snapZonesToSegments();
@@ -31,8 +36,7 @@ function initMap(){
 * coordinates: 2D array of google map LatLng object
 * coordinates[i]: coordinates for a segement
 */
-function phaseCoordinates(){	
-	
+function phaseCoordinates(){		
 	var temp = [];
 	if (coordinates.length == 0){
 		return;
@@ -57,10 +61,43 @@ function phaseCoordinates(){
 	coordinates = temp;	
 }
 
+function addSegmentsToAccordion(){
+	for (var i = 0; i < coordinates.length ; i++){
+		$("#accordion")
+		.append("<h3>Segment " + (i + 1) + "</h3>" +
+			"<div><label class='control-label'>Transportation</label>" +
+			"<input type='text' name='transportation' class='form-control'/></div>");
+	}
+	$("#accordion").accordion({
+		collapsible: true,
+		active: false
+	});
+}
+
+function selectSegment(id){
+	if (id == -1){
+		selected = null;
+		for (var i = 0; i < segments.length ; i++)
+			segments[i].setOptions({
+				strokeColor: colours[i%colours.length] 
+			});		
+	}
+	else{
+		for (var i = 0; i < segments.length ; i++)
+			segments[i].setOptions({
+				strokeColor: 'grey'
+			});		
+		selected = segments[id];
+		selected.setOptions({
+			strokeColor: colours[id%colours.length]
+		});
+	}
+}
+
 /*** 
 * Zoom the map to show the trip
 */
-function zoomToCoordinates(){	
+function zoomToTrip(){	
 	var bounds = new google.maps.LatLngBounds();
 	for (var i = 0; i < coordinates.length ; i++){
 		for (var j = 0; j < coordinates[i].length; j++)
@@ -72,7 +109,7 @@ function zoomToCoordinates(){
 /*** 
 * Draw each segement (polyline)
 */
-function drawSegments() {
+function drawSegments() {	
 	for (var i = 0; i < coordinates.length; i++){
 		segment = new google.maps.Polyline({
 			path: coordinates[i],
@@ -82,15 +119,23 @@ function drawSegments() {
 		segment.setMap(map);
 		segment.segId = coordinates[i].id;
 		segment.id = i;
-		// segment click event, pop up a infowindow which allows to change transportation
-		google.maps.event.addListener(segment, 'click', function(event) { 
-			var form = $(".seg-form-" + this.segId).clone().show()[0];
-			var infowindow = new google.maps.InfoWindow();
-			infowindow.setContent(form);
-			infowindow.setPosition(event.latLng);
-			infowindow.open(map);
-		});
 		segments.push(segment);
+	}
+}
+
+function testMarkers(){
+	for (var i = 0; i < coordinates.length ; i++){
+		for (var j = 0; j < coordinates[i].length; j++){
+			var marker = new google.maps.Marker({
+				position: coordinates[i][j],
+				opacity: 0.3
+			});
+			marker.setMap(map);
+			marker.pid = coordinates[i][j].id;
+			google.maps.event.addListener(marker, "click", function(){
+				console.log(this.pid);
+			});
+		}
 	}
 }
 
@@ -124,7 +169,7 @@ function drawZones(){
 	var i = coordinates.length - 1;
 	var j = coordinates[i].length -1;
 	var zone = new google.maps.Marker({
-		position: coordinates[i][j],
+		position: coordinates[i][j]
 	});
 	zone.setMap(map);	
 	zone.id = i;	
@@ -137,7 +182,7 @@ function drawZones(){
 */
 function snapZonesToSegments(){
 	for (var i = 1; i < zones.length - 1; i++){
-		zone = zones[i];
+		var zone = zones[i];
 		var before = zone.segBefore.getPath().getArray();
 		var after = zone.segAfter.getPath().getArray();
 		// the moving range of a zone is segment before plus segment after
@@ -145,10 +190,10 @@ function snapZonesToSegments(){
 			path: before.concat(after)
 		});
 		zone.str = new SnapToRoute(map, zone, merged);
-		google.maps.event.addListener(zones[i], "drag", function(){
+		google.maps.event.addListener(zone, "drag", function(){
 			updateSegments(this);
 		});
-		google.maps.event.addListener(zones[i], "dragend", function(){
+		google.maps.event.addListener(zone, "dragend", function(){
 			updateSegments(this);
 		});
 	}
@@ -203,6 +248,8 @@ function updateSegments(zone){
 		coordinates[id-1].push(latlng);		
 		segments[id].setPath(coordinates[id]);
 		segments[id-1].setPath(coordinates[id-1]);
+		console.log(coordinates[id-1]);
+		console.log(coordinates[id]);
 	}
 
 	// update the moving range of zone before and zone after
@@ -229,24 +276,24 @@ function updateStr(zone){
  * @param {GMarker} marker Marker to move along the route.
  * @param {GPolyline} polyline The line the marker should snap to.
  */
-function SnapToRoute(map, marker, polyline) {
-	this.routePixels_ = [];
-	this.normalProj_ = map.getProjection();
-	this.map_ = map;
-	this.marker_ = marker;
-	this.polyline_ = polyline;
+ function SnapToRoute(map, marker, polyline) {
+ 	this.routePixels_ = [];
+ 	this.normalProj_ = map.getProjection();
+ 	this.map_ = map;
+ 	this.marker_ = marker;
+ 	this.polyline_ = polyline;
 
-	this.init_();
-}
+ 	this.init_();
+ }
 
 /**
  * Initialize the objects.
  * @private
  */ 
-SnapToRoute.prototype.init_ = function () {
-	this.loadLineData_();
-	this.loadMapListener_();
-};
+ SnapToRoute.prototype.init_ = function () {
+ 	this.loadLineData_();
+ 	this.loadMapListener_();
+ };
 
 /**
  * Change the marker and/or polyline used by the class.
@@ -255,74 +302,74 @@ SnapToRoute.prototype.init_ = function () {
  * @param {GPolyline} polyline Optional line to snap to, 
  *   or null if you do not want to change that target.
  */
-SnapToRoute.prototype.updateTargets = function (marker, polyline) {
-	this.marker_ = marker || this.marker_;
-	this.polyline_ = polyline || this.polyline_;
-	this.loadLineData_();
-};
+ SnapToRoute.prototype.updateTargets = function (marker, polyline) {
+ 	this.marker_ = marker || this.marker_;
+ 	this.polyline_ = polyline || this.polyline_;
+ 	this.loadLineData_();
+ };
 
 /**
  * update the polyline data.
  */
-SnapToRoute.prototype.updateLine = function (path) {
-	this.polyline_.setPath(path);
-	this.loadLineData_();
-};
+ SnapToRoute.prototype.updateLine = function (path) {
+ 	this.polyline_.setPath(path);
+ 	this.loadLineData_();
+ };
 
 /**
  * Set up map listeners to calculate and update the marker position.
  * @private
  */
-SnapToRoute.prototype.loadMapListener_ = function () {
-	var me = this;
+ SnapToRoute.prototype.loadMapListener_ = function () {
+ 	var me = this;
 
-	google.maps.event.addListener(me.marker_, "dragend", function (evt) {
-		me.updateMarkerLocation_(evt.latLng);
-	});
+ 	google.maps.event.addListener(me.marker_, "dragend", function (evt) {
+ 		me.updateMarkerLocation_(evt.latLng);
+ 	});
 
-	google.maps.event.addListener(me.marker_, "drag", function (evt) {
-		me.updateMarkerLocation_(evt.latLng);
-	});
+ 	google.maps.event.addListener(me.marker_, "drag", function (evt) {
+ 		me.updateMarkerLocation_(evt.latLng);
+ 	});
 
-	google.maps.event.addListener(me.map_, "zoomend", function (evt) {
-		me.loadLineData_();
-	});
-};
+ 	google.maps.event.addListener(me.map_, "zoomend", function (evt) {
+ 		me.loadLineData_();
+ 	});
+ };
 
 /**
  * Load route pixels into array for calculations. 
  * This needs to be calculated whenever zoom changes 
  * @private
  */
-SnapToRoute.prototype.loadLineData_ = function () {
-	var zoom = this.map_.getZoom();
-	this.routePixels_ = [];
-	var path = this.polyline_.getPath();
-	for (var i = 0; i < path.getLength(); i++) {
-		var Px = this.normalProj_.fromLatLngToPoint(path.getAt(i));
-		this.routePixels_.push(Px);
-	}
-};
+ SnapToRoute.prototype.loadLineData_ = function () {
+ 	var zoom = this.map_.getZoom();
+ 	this.routePixels_ = [];
+ 	var path = this.polyline_.getPath();
+ 	for (var i = 0; i < path.getLength(); i++) {
+ 		var Px = this.normalProj_.fromLatLngToPoint(path.getAt(i));
+ 		this.routePixels_.push(Px);
+ 	}
+ };
 
 /**
  * Handle the move listener output and move the given marker.
  * @param {GLatLng} mouseLatLng
  * @private
  */
-SnapToRoute.prototype.updateMarkerLocation_ = function (mouseLatLng) {
-	var markerLatLng = this.getClosestLatLng(mouseLatLng);
-	this.marker_.setPosition(markerLatLng);
-};
+ SnapToRoute.prototype.updateMarkerLocation_ = function (mouseLatLng) {
+ 	var markerLatLng = this.getClosestLatLng(mouseLatLng);
+ 	this.marker_.setPosition(markerLatLng);
+ };
 
 /**
  * Calculate closest lat/lng on the polyline to a test lat/lng.
  * @param {GLatLng} latlng The coordinate to test.
  * @return {GLatLng} The closest coordinate.
  */
-SnapToRoute.prototype.getClosestLatLng = function (latlng) {
-	var r = this.distanceToLines_(latlng);
-	return this.normalProj_.fromPointToLatLng(new google.maps.Point(r.x, r.y));
-};
+ SnapToRoute.prototype.getClosestLatLng = function (latlng) {
+ 	var r = this.distanceToLines_(latlng);
+ 	return this.normalProj_.fromPointToLatLng(new google.maps.Point(r.x, r.y));
+ };
 
 /** @return the nearest segment which indicates the position of marker
 */
@@ -337,12 +384,12 @@ SnapToRoute.prototype.getPointPosition = function () {
  * @param {GLatLng} mouseLatLng
  * @private
  */
-SnapToRoute.prototype.distanceToLines_ = function (mouseLatLng) {
-	var zoom = this.map_.getZoom();
-	var mousePx = this.normalProj_.fromLatLngToPoint(mouseLatLng);
-	var routePixels_ = this.routePixels_;
-	return this.getClosestPointOnLines_(mousePx, routePixels_);
-};
+ SnapToRoute.prototype.distanceToLines_ = function (mouseLatLng) {
+ 	var zoom = this.map_.getZoom();
+ 	var mousePx = this.normalProj_.fromLatLngToPoint(mouseLatLng);
+ 	var routePixels_ = this.routePixels_;
+ 	return this.getClosestPointOnLines_(mousePx, routePixels_);
+ };
 
 /**
  * Static function. Find point on lines nearest test point
@@ -355,59 +402,59 @@ SnapToRoute.prototype.distanceToLines_ = function (mouseLatLng) {
  * @param {Array<Point>} aXys
  * @private
  */
-SnapToRoute.prototype.getClosestPointOnLines_ = function (pXy, aXys) {
-	var minDist;
-	var to;
-	var from;
-	var x;
-	var y;
-	var i;
-	var dist;
+ SnapToRoute.prototype.getClosestPointOnLines_ = function (pXy, aXys) {
+ 	var minDist;
+ 	var to;
+ 	var from;
+ 	var x;
+ 	var y;
+ 	var i;
+ 	var dist;
 
-	if (aXys.length > 1) {
-		for (var n = 1; n < aXys.length; n++) {
-			if (aXys[n].x !== aXys[n - 1].x) {
-				var a = (aXys[n].y - aXys[n - 1].y) / (aXys[n].x - aXys[n - 1].x);
-				var b = aXys[n].y - a * aXys[n].x;
-				dist = Math.abs(a * pXy.x + b - pXy.y) / Math.sqrt(a * a + 1);
-			} else {
-				dist = Math.abs(pXy.x - aXys[n].x);
-			}
+ 	if (aXys.length > 1) {
+ 		for (var n = 1; n < aXys.length; n++) {
+ 			if (aXys[n].x !== aXys[n - 1].x) {
+ 				var a = (aXys[n].y - aXys[n - 1].y) / (aXys[n].x - aXys[n - 1].x);
+ 				var b = aXys[n].y - a * aXys[n].x;
+ 				dist = Math.abs(a * pXy.x + b - pXy.y) / Math.sqrt(a * a + 1);
+ 			} else {
+ 				dist = Math.abs(pXy.x - aXys[n].x);
+ 			}
 
-			var rl2 = Math.pow(aXys[n].y - aXys[n - 1].y, 2) + Math.pow(aXys[n].x - aXys[n - 1].x, 2);
-			var ln2 = Math.pow(aXys[n].y - pXy.y, 2) + Math.pow(aXys[n].x - pXy.x, 2);
-			var lnm12 = Math.pow(aXys[n - 1].y - pXy.y, 2) + Math.pow(aXys[n - 1].x - pXy.x, 2);
-			var dist2 = Math.pow(dist, 2);
-			var calcrl2 = ln2 - dist2 + lnm12 - dist2;
-			if (calcrl2 > rl2) {
-				dist = Math.sqrt(Math.min(ln2, lnm12));
-			}
+ 			var rl2 = Math.pow(aXys[n].y - aXys[n - 1].y, 2) + Math.pow(aXys[n].x - aXys[n - 1].x, 2);
+ 			var ln2 = Math.pow(aXys[n].y - pXy.y, 2) + Math.pow(aXys[n].x - pXy.x, 2);
+ 			var lnm12 = Math.pow(aXys[n - 1].y - pXy.y, 2) + Math.pow(aXys[n - 1].x - pXy.x, 2);
+ 			var dist2 = Math.pow(dist, 2);
+ 			var calcrl2 = ln2 - dist2 + lnm12 - dist2;
+ 			if (calcrl2 > rl2) {
+ 				dist = Math.sqrt(Math.min(ln2, lnm12));
+ 			}
 
-			if ((minDist == null) || (minDist > dist)) {
-				to = Math.sqrt(lnm12 - dist2) / Math.sqrt(rl2);
-				from = Math.sqrt(ln2 - dist2) / Math.sqrt(rl2);
-				minDist = dist;
-				i = n;
-			}
-		}
-		if (to > 1) {
-			to = 1;
-		}
-		if (from > 1) {
-			to = 0;
-			from = 1;
-		}
-		var dx = aXys[i - 1].x - aXys[i].x;
-		var dy = aXys[i - 1].y - aXys[i].y;
+ 			if ((minDist == null) || (minDist > dist)) {
+ 				to = Math.sqrt(lnm12 - dist2) / Math.sqrt(rl2);
+ 				from = Math.sqrt(ln2 - dist2) / Math.sqrt(rl2);
+ 				minDist = dist;
+ 				i = n;
+ 			}
+ 		}
+ 		if (to > 1) {
+ 			to = 1;
+ 		}
+ 		if (from > 1) {
+ 			to = 0;
+ 			from = 1;
+ 		}
+ 		var dx = aXys[i - 1].x - aXys[i].x;
+ 		var dy = aXys[i - 1].y - aXys[i].y;
 
-		x = aXys[i - 1].x - (dx * to);
-		y = aXys[i - 1].y - (dy * to);
-	}
-	return {
-		'x': x,
-		'y': y,
-		'i': i,
-		'to': to,
-		'from': from
-	};
-};
+ 		x = aXys[i - 1].x - (dx * to);
+ 		y = aXys[i - 1].y - (dy * to);
+ 	}
+ 	return {
+ 		'x': x,
+ 		'y': y,
+ 		'i': i,
+ 		'to': to,
+ 		'from': from
+ 	};
+ };

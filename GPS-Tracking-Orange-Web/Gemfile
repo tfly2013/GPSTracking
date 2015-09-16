@@ -6,6 +6,7 @@ gem 'simple_token_authentication'
 gem 'bootstrap-sass'
 gem 'delayed_job_active_record'
 gem 'daemons'
+gem 'jquery-ui-rails', '~> 5.0.0'
 
 # Database
 gem 'pg'
