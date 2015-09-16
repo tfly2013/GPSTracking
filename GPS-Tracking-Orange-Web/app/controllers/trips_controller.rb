@@ -10,14 +10,16 @@ class TripsController < ApplicationController
     @segment = Segment.new
     @segment.trip = @trip
     locations = Array.new
-    locations_array.each do |location_params|
-      @location = Location.new(location_params)
-      @location.segment = @segment
-      @location.time = Time.at(location_params[:time] / 1000)
-      @locations.save
+    trip.transaction do
+      locations_array.each do |location_params|
+        @location = Location.new(location_params)
+        @location.segment = @segment
+        @location.time = Time.at(location_params[:time] / 1000)
+        @locations.save!
+      end
+      @segment.save!
+      @trip.save!
     end
-    @segment.save
-    @trip.save
     snap_to_road(locations)
     render :status => 200, :json => { :success => true }
   end
@@ -31,18 +33,47 @@ class TripsController < ApplicationController
   # GET /trips/1
   # GET /trips/1.json
   def show
-    @coordinates = []
-    locations = @trip.locations.sort
-    locations.each do |location|
-      @coordinates << {:lat => location.latitude, :lng => location.longitude, :seg => location.segment.id }
+    @tripJson = []
+    @trip.segments.sort.each do |segment|
+      locations = []
+      segment.locations.sort.each do |location|
+        locations << {:id => location.id, :lat => location.latitude, :lng => location.longitude }
+      end
+      @tripJson << {:id => segment.id, :transportation => segment.transportation, :locations => locations}
     end
   end
 
   # PATCH/PUT /trips/1
   # PATCH/PUT /trips/1.json
   def update
-    @trip.update(trip_params)
-    redirect_to trip_path(@trip)
+    Trip.transaction do
+      trip_params.each do |seg_params|
+        segment = nil
+        if !seg_params[:id].nil?
+          segment = Segment.find(seg_params[:id])
+          segment.update(:transportation => seg_params[:transportation])
+        else
+          segment = Segment.new
+          segment.transportation = seg_params[:transportation]
+          segment.trip = @trip
+          segment.save!
+        end
+        seg_params[:locations].each do |loc_params|
+          if !loc_params[:id].nil?
+            location = Location.find(loc_params[:id])
+            location.segment = segment
+            location.update(loc_params)
+          else
+            location = Location.new
+            location.latitude = loc_params[:latitude]
+            location.longitude = loc_params[:longitude]
+            location.segment = segment
+            location.save!
+          end
+        end
+      end
+    end
+    render :status => 200, :json => { :success => true }
   end
 
   # DELETE /trips/1
@@ -54,11 +85,12 @@ class TripsController < ApplicationController
       seg.destroy
     end
     @trip.destroy
-    redirect_to trips_path
+    redirect_to trips_path, :notice => "Trip deleted."
   end
 
   private
-  def snap_to_road(trip)     
+  
+  def snap_to_road(trip)
     locations = trip.locations
     path = Array.new
     locations.each do |location|
@@ -77,17 +109,19 @@ class TripsController < ApplicationController
     response = connection.start {|http| http.request(request) }
     data = JSON.parse(response.body)
 
-    i = 0
-    data["snappedPoints"].each do |point|      
-      index = point["originalIndex"]
-      while index > i
-        locations[i].destroy
+    Trip.transaction do
+      i = 0
+      data["snappedPoints"].each do |point|
+        index = point["originalIndex"]
+        while index > i
+          locations[i].destroy
+          i+=1
+        end
+        locations[index].latitude = point["location"]["latitude"]
+        locations[index].longitude = point["location"]["longitude"]
+        locations[index].save!
         i+=1
       end
-      locations[index].latitude = point["location"]["latitude"]
-      locations[index].longitude = point["location"]["longitude"]
-      locations[index].save
-      i+=1
     end
   end
   # handle_asynchronously :snap_to_road
@@ -106,6 +140,6 @@ class TripsController < ApplicationController
   end
 
   def trip_params
-    params.require(:trip).permit(:segments_attributes => [:id, :transportation])
+    params.require(:trip).permit(:segments_attributes => [:id, :transportation, :locations_attributes => [:id, :latitude, :longitude]])
   end
 end
