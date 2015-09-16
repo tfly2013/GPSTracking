@@ -136,7 +136,7 @@ function testMarkers(){
 			google.maps.event.addListener(marker, "click", function(){
 				console.log(this.pid);
 			});
-		}
+		} 
 	}
 }
 
