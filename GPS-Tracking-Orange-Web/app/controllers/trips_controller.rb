@@ -9,12 +9,14 @@ class TripsController < ApplicationController
     @trip.user = current_user
     @segment = Segment.new
     @segment.trip = @trip
+    @segment.order = 0
     locations = Array.new
     trip.transaction do
-      locations_array.each do |location_params|
+      locations_array.each_with_index do |location_params, index|
         @location = Location.new(location_params)
         @location.segment = @segment
         @location.time = Time.at(location_params[:time] / 1000)
+        @location.order = index
         @locations.save!
       end
       @segment.save!
@@ -34,9 +36,9 @@ class TripsController < ApplicationController
   # GET /trips/1.json
   def show
     @tripJson = []
-    @trip.segments.sort.each do |segment|
+    @trip.segments.order(:order).each do |segment|
       locations = []
-      segment.locations.sort.each do |location|
+      segment.locations.order(:order).each do |location|
         locations << {:id => location.id, :lat => location.latitude, :lng => location.longitude }
       end
       @tripJson << {:id => segment.id, :transportation => segment.transportation, :locations => locations}
@@ -47,26 +49,26 @@ class TripsController < ApplicationController
   # PATCH/PUT /trips/1.json
   def update
     Trip.transaction do
-      trip_params.each do |seg_params|
+      trip_params[:segments_attributes].each do |seg_params|
         segment = nil
         if !seg_params[:id].nil?
           segment = Segment.find(seg_params[:id])
-          segment.update(:transportation => seg_params[:transportation])
+          segment.update(:order => seg_params[:order], 
+            :transportation => seg_params[:transportation])
         else
           segment = Segment.new
+          segment.order = seg_params[:order]
           segment.transportation = seg_params[:transportation]
           segment.trip = @trip
           segment.save!
         end
-        seg_params[:locations].each do |loc_params|
+        seg_params[:locations_attributes].each do |loc_params|
           if !loc_params[:id].nil?
             location = Location.find(loc_params[:id])
             location.segment = segment
             location.update(loc_params)
           else
-            location = Location.new
-            location.latitude = loc_params[:latitude]
-            location.longitude = loc_params[:longitude]
+            location = Location.new(loc_params)
             location.segment = segment
             location.save!
           end
@@ -140,6 +142,8 @@ class TripsController < ApplicationController
   end
 
   def trip_params
-    params.require(:trip).permit(:segments_attributes => [:id, :transportation, :locations_attributes => [:id, :latitude, :longitude]])
+    params.require(:trip).permit(:segments_attributes => 
+      [:id, :transportation, :order, :locations_attributes => 
+        [:id, :latitude, :longitude, :order]])
   end
 end

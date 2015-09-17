@@ -136,7 +136,7 @@ function testMarkers(){
 			google.maps.event.addListener(marker, "click", function(){
 				console.log(this.pid);
 			});
-		} 
+		}
 	}
 }
 
@@ -276,6 +276,7 @@ function saveTrip(){
 		var segment = {};
 		segment.id = trip[i].id;
 		segment.transportation = $("#transportation-" + i)[0].value;
+		segment.order = i + 1;
 		var locations = []
 		// The last point is the repeat of the first point of next segment
 		for (var j = 0; j < trip[i].length - 1; j++){
@@ -284,6 +285,7 @@ function saveTrip(){
 				location.id = trip[i][j].id;
 			location.latitude = trip[i][j].lat();
 			location.longitude = trip[i][j].lng();
+			location.order = (i + 1) * (j + 1);
 			locations.push(location);
 		}
 		segment.locations_attributes = locations;
@@ -297,6 +299,11 @@ function saveTrip(){
 		contentType: "application/json",
 		dataType: "json",
 		success: function(){
+			alert("Trip updated successfully.");
+			window.location.replace(tripUrl);
+		},
+		error: function(){
+			alert("Something wrong happened, please try again.");
 			window.location.replace(tripUrl);
 		}
 	});
