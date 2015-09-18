@@ -17,7 +17,7 @@ class TripsController < ApplicationController
         @location.segment = @segment
         @location.time = Time.at(location_params[:time] / 1000)
         @location.order = index
-        @locations.save!
+        @location.save!
       end
       @segment.save!
       @trip.save!
