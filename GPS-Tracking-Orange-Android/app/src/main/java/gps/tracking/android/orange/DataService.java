@@ -14,6 +14,8 @@ import android.support.annotation.Nullable;
 
 public class DataService extends Service{
 
+    private LocationManager locationManager;
+    private LocationListener locationListener;
     private SQLiteDatabase db;
     public DataService() {
 
@@ -28,13 +30,14 @@ public class DataService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         db = new LocationsDbHelper(this).getWritableDatabase();
-        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = new LocationListener() {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 ContentValues values = new ContentValues();
                 values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LATITUDE, location.getLatitude());
                 values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LONGITUDE, location.getLongitude());
+                values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_SPEED, location.getSpeed());
                 values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_ACCURACY, location.getAccuracy());
                 values.put(LocationsDbHelper.LoctionEntry.COLUMN_NAME_TIME, location.getTime());
                 db.insert(LocationsDbHelper.LoctionEntry.TABLE_NAME, null, values);
@@ -61,6 +64,7 @@ public class DataService extends Service{
 
     @Override
     public void onDestroy() {
+        locationManager.removeUpdates(locationListener);
         super.onDestroy();
     }
 }

@@ -22,7 +22,7 @@ class TripsController < ApplicationController
       @segment.save!
       @trip.save!
     end
-    snap_to_road(locations)
+    snap_to_road(@trip)
     render :status => 200, :json => { :success => true }
   end
 
@@ -138,7 +138,7 @@ class TripsController < ApplicationController
   end
 
   def locations_array
-    params.permit(:locations => [:latitude, :longitude,:accuracy,:time]).require(:locations)
+    params.permit(:locations => [:latitude, :longitude,:speed,:accuracy,:time]).require(:locations)
   end
 
   def trip_params
