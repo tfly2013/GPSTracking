@@ -11,7 +11,7 @@ class TripsController < ApplicationController
     @segment.trip = @trip
     @segment.order = 0
     locations = Array.new
-    trip.transaction do
+    Trip.transaction do
       locations_array.each_with_index do |location_params, index|
         @location = Location.new(location_params)
         @location.segment = @segment

@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 (Request.Method.POST, VolleyHelper.TRIP_URL, jsonObj, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Toast.makeText(MainActivity.this, "Data sent successfully.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Your trip is sent successfully.", Toast.LENGTH_LONG).show();
                     }
                 }, new Response.ErrorListener() {
 
