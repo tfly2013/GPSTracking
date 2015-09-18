@@ -21,6 +21,11 @@
  @import "trips";
  @import "reports"; 
 
+ html, body {
+   margin:0;
+   padding:0;
+   height:100%;
+ }
 // make all images responsive by default
 img {
   @extend .img-responsive;
@@ -38,7 +43,7 @@ img {
 // to make views framework-neutral
 main {
   @extend .container;
-  padding-bottom: 80px;
+  padding-bottom: 120px;
   margin-top: 51px; // accommodate the navbar
 }
 section {
@@ -54,4 +59,21 @@ section {
   h4 {
     margin: 0px;
   }
+}
+.wrap {
+  margin: 0;
+  padding: 0;
+  min-height:100%;
+  position:relative;
+}
+
+footer {
+  position:absolute;
+  bottom:0;
+  width:100%;
+  height: 100px;
+  background-color: #1b1c1d;
+}
+footer p{
+  color: white;
 }

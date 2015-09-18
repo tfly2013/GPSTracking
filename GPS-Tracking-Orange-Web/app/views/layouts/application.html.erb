@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>GPSTrackingOrangeWeb</title>
-		<%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-		<%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
-		<%= javascript_include_tag "https://maps.googleapis.com/maps/api/js?key=AIzaSyA-10-w06yl2bTDNkIPGT0sD52X32pAyZE&libraries=geometry,places", :type => "text/javascript" %>
-		<%= javascript_include_tag "https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.1.2/src/markerclusterer_packed.js", :type => "text/javascript" %>
-		<%= csrf_meta_tags %>
-	</head>
-	<body>
+<head>
+	<title>GPSTrackingOrangeWeb</title>
+	<%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+	<%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+	<%= javascript_include_tag "https://maps.googleapis.com/maps/api/js?key=AIzaSyA-10-w06yl2bTDNkIPGT0sD52X32pAyZE&libraries=geometry,places", :type => "text/javascript" %>
+	<%= javascript_include_tag "https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.1.2/src/markerclusterer_packed.js", :type => "text/javascript" %>
+	<%= csrf_meta_tags %>
+</head>
+<body>
+	<div class="wrap">
 		<header>
 			<%= render 'layouts/navigation' %>
 		</header>
@@ -16,6 +17,8 @@
 			<%= render 'layouts/messages' %>
 			<%= yield %>
 		</main>
-		<%= render 'layouts/footer' %>
-	</body>
+	
+	<%= render 'layouts/footer' %>
+	</div>
+</body>
 </html>
