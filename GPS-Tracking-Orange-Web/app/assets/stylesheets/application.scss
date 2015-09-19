@@ -22,10 +22,11 @@
  @import "reports"; 
 
  html, body {
-   margin:0;
-   padding:0;
    height:100%;
  }
+ .navbar {
+  margin-bottom: 0;
+}
 // make all images responsive by default
 img {
   @extend .img-responsive;
@@ -43,8 +44,8 @@ img {
 // to make views framework-neutral
 main {
   @extend .container;
-  padding-bottom: 120px;
-  margin-top: 51px; // accommodate the navbar
+  overflow: auto;
+  padding-bottom:140px;
 }
 section {
   @extend .row;
@@ -60,20 +61,15 @@ section {
     margin: 0px;
   }
 }
-.wrap {
-  margin: 0;
-  padding: 0;
-  min-height:100%;
-  position:relative;
+.wrapper {
+  min-height: 100%;
 }
-
 footer {
-  position:absolute;
-  bottom:0;
-  width:100%;
-  height: 100px;
-  background-color: #1b1c1d;
-}
-footer p{
-  color: white;
+  position: relative;
+  margin-top: -120px;
+  height: 120px;
+  clear:both;
+  padding-top:20px;
+  background-color: #1B1C1D;
+  color: #9D9D9D;
 }

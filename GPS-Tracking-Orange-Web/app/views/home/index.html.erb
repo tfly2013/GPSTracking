@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>GPS Track - Home</title>
@@ -8,18 +9,29 @@
     <%= csrf_meta_tags %>
   </head>
   <body>
-    <div class="wrap">
+    <div class="wrapper">
       <header>
         <%= render 'layouts/navigation' %>
         <div class="header-content">
           <h1>GPS Track</h1>
           <h2>Trip tracking and reporting system</h2>
-          <button class="btn btn-primary btn-lg"><strong>View My Trips </strong><i class="fa fa-arrow-right"></i></button>
+          <% if user_signed_in? %>
+            <%= link_to trips_path, class: "btn btn-primary btn-lg" do %>
+              <strong>View My Trips </strong><i class="fa fa-arrow-right"></i>
+            <% end %>
+          <% else %>
+            <%= link_to new_user_session_path, class: "btn btn-primary btn-lg sign-btn" do %>
+              <strong>Sign In </strong><i class="fa fa-arrow-right"></i>
+            <% end %>
+            <%= link_to new_user_registration_path, class: "btn btn-primary btn-lg sign-btn" do %>
+              <strong>Sign Up </strong><i class="fa fa-arrow-right"></i>
+            <% end %>
+          <% end %>
         </div>
       </header>
       <main role="main">
         <%= render 'layouts/messages' %>
-      </main>
+      </main>      
     </div>
     <%= render 'layouts/footer' %>
   </body>

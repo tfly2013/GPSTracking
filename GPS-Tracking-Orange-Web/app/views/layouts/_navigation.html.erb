@@ -1,5 +1,4 @@
-<%# navigation styled for Bootstrap 3.0 %>
-<nav class="navbar navbar-inverse navbar-fixed-top">
+<nav class="navbar navbar-inverse navbar-static-top">
 	<div class="container">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -12,8 +11,8 @@
 			<strong>GPS Track</strong>
 			<% end %>
 		</div>
-		<% if user_signed_in? %>
 		<div class="collapse navbar-collapse">
+			<% if user_signed_in? %>
 			<ul class="nav navbar-nav">
 				<li>
 					<%= link_to trips_path do %>
@@ -65,7 +64,7 @@
 	</div>
 </nav>
 <script>
-    $(document).ready(function() {
-        $('a[href="' + this.location.pathname + '"]').parent().addClass('active');
-    });
+	$(function() {
+		$('a[href="' + this.location.pathname + '"]').parent().addClass('active');
+	}); 
 </script>
