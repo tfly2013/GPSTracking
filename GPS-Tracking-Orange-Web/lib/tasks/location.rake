@@ -8,6 +8,10 @@ namespace :location do
     input.each{|line| array << {"longitude"=>line[0],"latitude"=>line[1],"altitude"=>line[2],"haccuracy"=>line[3],"vaccuracy"=>line[4],"timestamp"=>line[5],"speed"=>line[6],"course"=>line[7] }}
     @user = User.find(1)
 
+    Location.delete_all
+    Segment.delete_all
+    Trip.delete_all
+
     @trip = @user.trips.new
     @trip.save
     
@@ -16,9 +20,9 @@ namespace :location do
     @segment.save
 
     array.each do |line|
-    	location = Location.create(user_id: @user.id, latitude: line['latitude'].to_f, longitude: line['longitude'].to_f, accuracy: line['haccuracy'].to_f, time: line['timestamp'], speed: line['speed'])
+    	location = Location.create(latitude: line['latitude'].to_f, longitude: line['longitude'].to_f, accuracy: line['haccuracy'].to_f, time: line['timestamp'], speed: line['speed'])
     	location.segment = @segment
-      location.trip = @trip
+      location.order = location.time.to_i
     	location.save
     end
   end

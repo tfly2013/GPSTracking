@@ -14,6 +14,7 @@ public class LocationsDbHelper extends SQLiteOpenHelper {
         public static final String TABLE_NAME = "locations";
         public static final String COLUMN_NAME_LATITUDE = "latitude";
         public static final String COLUMN_NAME_LONGITUDE = "longitude";
+        public static final String COLUMN_NAME_SPEED = "speed";
         public static final String COLUMN_NAME_ACCURACY = "accuracy";
         public static final String COLUMN_NAME_TIME = "time";
     }
@@ -26,6 +27,7 @@ public class LocationsDbHelper extends SQLiteOpenHelper {
                     LoctionEntry._ID + " INTEGER PRIMARY KEY," +
                     LoctionEntry.COLUMN_NAME_LATITUDE + REAL_TYPE + COMMA_SEP +
                     LoctionEntry.COLUMN_NAME_LONGITUDE + REAL_TYPE + COMMA_SEP +
+                    LoctionEntry.COLUMN_NAME_SPEED + REAL_TYPE + COMMA_SEP +
                     LoctionEntry.COLUMN_NAME_ACCURACY + REAL_TYPE + COMMA_SEP +
                     LoctionEntry.COLUMN_NAME_TIME + INTEGER_TYPE +
                     " )";

@@ -8,7 +8,7 @@ import com.android.volley.toolbox.Volley;
 
 public class VolleyHelper {
     public static final String DOMAIN = "http://stormy-bastion-5570.herokuapp.com";
-//    public static final String DOMAIN = "http://7a9f73b1.ngrok.io";
+//    public static final String DOMAIN = "http://b733b06d.ngrok.io";
     public static final String LOGIN_URL = DOMAIN + "/api/sign_in";
     public static final String LOGOUT_URL = DOMAIN + "/api/sign_out";
     public static final String TRIP_URL = DOMAIN + "/trips";

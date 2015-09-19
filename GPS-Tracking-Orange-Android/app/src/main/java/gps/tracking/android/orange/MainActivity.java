@@ -158,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
         String[] projection = {
                 LocationsDbHelper.LoctionEntry.COLUMN_NAME_LATITUDE,
                 LocationsDbHelper.LoctionEntry.COLUMN_NAME_LONGITUDE,
+                LocationsDbHelper.LoctionEntry.COLUMN_NAME_SPEED,
                 LocationsDbHelper.LoctionEntry.COLUMN_NAME_ACCURACY,
                 LocationsDbHelper.LoctionEntry.COLUMN_NAME_TIME
         };
@@ -166,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = db.query(LocationsDbHelper.LoctionEntry.TABLE_NAME, projection, null, null, null, null, sortOrder);
         int latitudeIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LATITUDE);
         int longitudeIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_LONGITUDE);
+        int speedIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_SPEED);
         int accuracyIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_ACCURACY);
         int timeIndex = cursor.getColumnIndexOrThrow(LocationsDbHelper.LoctionEntry.COLUMN_NAME_TIME);
 
@@ -179,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONObject locationObj = new JSONObject();
                 locationObj.put("latitude", cursor.getFloat(latitudeIndex));
                 locationObj.put("longitude", cursor.getFloat(longitudeIndex));
+                locationObj.put("speed", cursor.getFloat(speedIndex));
                 locationObj.put("accuracy", cursor.getFloat(accuracyIndex));
                 locationObj.put("time", cursor.getLong(timeIndex));
                 locationArray.put(locationObj);
@@ -199,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                 (Request.Method.POST, VolleyHelper.TRIP_URL, jsonObj, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Toast.makeText(MainActivity.this, "Data sent successfully.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(MainActivity.this, "Your trip is sent successfully.", Toast.LENGTH_LONG).show();
                     }
                 }, new Response.ErrorListener() {
 

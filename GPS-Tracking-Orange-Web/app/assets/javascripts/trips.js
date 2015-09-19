@@ -98,7 +98,7 @@ function selectSegment(id){
 	else{
 		for (var i = 0; i < segments.length ; i++)
 			segments[i].setOptions({
-				strokeColor: 'grey'
+				strokeColor: '#C8C8C8'
 			});		
 		selected = segments[id];
 		selected.setOptions({

@@ -11,18 +11,18 @@ class TripsController < ApplicationController
     @segment.trip = @trip
     @segment.order = 0
     locations = Array.new
-    trip.transaction do
+    Trip.transaction do
       locations_array.each_with_index do |location_params, index|
         @location = Location.new(location_params)
         @location.segment = @segment
         @location.time = Time.at(location_params[:time] / 1000)
         @location.order = index
-        @locations.save!
+        @location.save!
       end
       @segment.save!
       @trip.save!
     end
-    snap_to_road(locations)
+    snap_to_road(@trip)
     render :status => 200, :json => { :success => true }
   end
 
@@ -138,7 +138,7 @@ class TripsController < ApplicationController
   end
 
   def locations_array
-    params.permit(:locations => [:latitude, :longitude,:accuracy,:time]).require(:locations)
+    params.permit(:locations => [:latitude, :longitude,:speed,:accuracy,:time]).require(:locations)
   end
 
   def trip_params
