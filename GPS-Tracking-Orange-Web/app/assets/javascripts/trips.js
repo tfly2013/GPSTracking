@@ -309,12 +309,10 @@ function saveTrip(){
 		data: JSON.stringify({trip: tripData}),
 		contentType: "application/json",
 		dataType: "json",
-		success: function(){
-			alert("Trip updated successfully.");
+		success: function(){			
 			window.location.replace(tripUrl);
 		},
 		error: function(){
-			alert("Something wrong happened, please try again.");
 			window.location.replace(tripUrl);
 		}
 	});

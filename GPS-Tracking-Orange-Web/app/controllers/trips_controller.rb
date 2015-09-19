@@ -75,6 +75,8 @@ class TripsController < ApplicationController
         end
       end
     end
+    flash[:notice] = 'Trip updated successfully.'
+    flash.keep(:notice)
     render :status => 200, :json => { :success => true }
   end
 
