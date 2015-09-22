@@ -288,7 +288,7 @@ function saveTrip(){
 		segment.id = trip[i].id;
 		segment.transportation = $("#transportation-" + i)[0].value;
 		segment.order = i + 1;
-		var locations = []
+		var locations = [];
 		// The last point is the repeat of the first point of next segment
 		for (var j = 0; j < trip[i].length - 1; j++){
 			var location = {};
