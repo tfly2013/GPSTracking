@@ -53,6 +53,9 @@ gem 'byebug'
   gem 'web-console', '~> 2.0'
 
   gem 'rspec-rails', '~> 3.0'
+
+  gem 'json_spec', '~> 1.1.4'
+  #gem 'rspec-mocks', '~> 2.11.3'
 end
 
 group :production do

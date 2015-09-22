@@ -20,11 +20,15 @@ require 'rails_helper'
 
 RSpec.describe ReportsController, type: :controller do
 
+  # before(:each) do
+  #   login_user
+  # end
   # This should return the minimal set of attributes required to create a valid
   # Report. As you add validations to Report, be sure to
   # adjust the attributes here as well.
   let(:valid_attributes) {
     skip("Add a hash of attributes valid for your model")
+    # :startLocation, :endLocation, :transportation
   }
 
   let(:invalid_attributes) {
