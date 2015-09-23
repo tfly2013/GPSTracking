@@ -2,10 +2,9 @@
   <div id="map"></div>
 </div>
 <div class="row">
+  <h3>For development use only:</h3>
   <% @trip.segments.each_with_index do |segment,index| %>
-    <h3>Segment <%= index + 1 %>
-      <%= link_to 'Edit', edit_trip_segment_path(@trip, segment), :class => 'btn btn-primary' %>
-      <%= link_to 'Delete', trip_segment_path(@trip, segment), method: :delete, data: { confirm: 'Are you sure?'}, :class => 'btn btn-danger' %></h3>
+    <h3>Segment <%= index + 1 %> </h3>
     <div class="cloumn">
       <table class="table table-striped">
         <thead>
@@ -32,8 +31,6 @@
     </div>
   <% end %>
   <br />
-  <%= link_to 'New', new_trip_segment_path(@trip), :class => 'btn btn-primary' %>
-  <%= link_to 'Back', trips_path, :class => 'btn btn-info' %>
 </div>
 <div id="map-control">
   <h3>Trip</h3>
@@ -45,6 +42,6 @@
 </div>
 <script type="text/javascript">
   var trip =<%= raw @tripJson.to_json %>;
-    var tripUrl = "<%= trip_path(@trip) %>";
-    $(initMap());
+        var tripUrl = "<%= trip_path(@trip) %>";
+        $(initMap());
 </script>

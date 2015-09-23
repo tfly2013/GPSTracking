@@ -30,6 +30,8 @@ class TripsController < ApplicationController
   # GET /trips.json
   def index
     @trips = current_user.trips
+    @unvalidated = @trips.where(:validated => false)
+    @validated = @trips.where(:validated => true)
   end
 
   # GET /trips/1
@@ -53,8 +55,8 @@ class TripsController < ApplicationController
         segment = nil
         if !seg_params[:id].nil?
           segment = Segment.find(seg_params[:id])
-          segment.update(:order => seg_params[:order], 
-            :transportation => seg_params[:transportation])
+          segment.update(:order => seg_params[:order],
+           :transportation => seg_params[:transportation])
         else
           segment = Segment.new
           segment.order = seg_params[:order]
@@ -74,36 +76,42 @@ class TripsController < ApplicationController
           end
         end
       end
+      @trip.validated = true
+      @trip.save!
     end
     flash[:notice] = 'Trip updated successfully.'
     flash.keep(:notice)
     render :status => 200, :json => { :success => true }
+  rescue
+    flash[:error] = 'Trip update failed. Please try again'
+    flash.keep(:error)
+    render :status => 400, :json => { :success => false }
   end
 
-  # DELETE /trips/1
-  def destroy
-    @trip.segments.each do |seg|
-      seg.locations.each do |loc|
-        loc.destroy
-      end
-      seg.destroy
+# DELETE /trips/1
+def destroy
+  @trip.segments.each do |seg|
+    seg.locations.each do |loc|
+      loc.destroy
     end
-    @trip.destroy
-    redirect_to trips_path, :notice => "Trip deleted."
+    seg.destroy
   end
+  @trip.destroy
+  redirect_to trips_path, :notice => "Trip deleted."
+end
 
-  private
-  def set_trip
-    @trip = current_user.trips.find(params[:id])
-  end
+private
+def set_trip
+  @trip = current_user.trips.find(params[:id])
+end
 
-  def locations_array
-    params.permit(:locations => [:latitude, :longitude,:speed,:accuracy,:time]).require(:locations)
-  end
+def locations_array
+  params.permit(:locations => [:latitude, :longitude,:speed,:accuracy,:time]).require(:locations)
+end
 
-  def trip_params
-    params.require(:trip).permit(:segments_attributes => 
-      [:id, :transportation, :order, :locations_attributes => 
-        [:id, :latitude, :longitude, :order]])
-  end
+def trip_params
+  params.require(:trip).permit(:segments_attributes =>
+   [:id, :transportation, :order, :locations_attributes =>
+    [:id, :latitude, :longitude, :order]])
+end
 end
