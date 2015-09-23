@@ -2,10 +2,12 @@
   <div id="map"></div>
 </div>
 <div class="row">
-  <% @trip.segments.each_with_index do |segment,index| %>
+  <% @trip.segments.order(:order).each_with_index do |segment,index| %>
     <h3><br>Segment <%= index + 1 %></br> 
       <br><%= "Transportation: #{segment.transportation}"%></br>
       <br><%= "Distance: #{segment.distance}"%></br>
+      <br><%= "StartTime: #{segment.startTime}"%></br>
+      <br><%= "EndTime: #{segment.endTime}"%></br>
       <br><%= "HighestSpeed: #{segment.highestSpeed}"%></br>
       <br><%= "AverageSpeed: #{segment.avgSpeed}"%></br>
       <br><%= link_to 'Edit', edit_trip_segment_path(@trip, segment), :class => 'btn btn-primary' %>
