@@ -21,7 +21,7 @@ class Trip < ActiveRecord::Base
 
   TRANSPORTATIONS = ["walking", "bicycle", "tram", "bus", "train", "car", "unknown"]
 
-  def SegmentsReorgnize()
+  def SegmentsReorgnize
     @trip = self
     locations = []
     oldSegments = []
@@ -300,6 +300,7 @@ class Trip < ActiveRecord::Base
         end
       end
     end
+    self.SegmentsReorgnize
   end
   handle_asynchronously :snap_to_road
 end
