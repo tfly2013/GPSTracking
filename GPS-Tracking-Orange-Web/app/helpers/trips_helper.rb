@@ -106,4 +106,29 @@ module TripsHelper
     	#Set transportation method to motor vehicle
     end
   end
+
+  def totalDistance(trip)
+  	totalDistance = 0
+  	prev = null
+  	trip.segments.each do |segment|
+  		segment.locations.each do |location|
+  			if prev == null
+  				prev = location
+  				next
+  			end
+  			totalDistance += moveDistance(location, prev)
+  	return totalDistance
+
+  def averageSpeed(trip)
+  	avgSpeed = 0
+  	prev = null
+  	trip.segments.each do |segment|
+		segment.locations.each do |location|
+			if prev == null
+				prev = location
+				next
+			end
+			avgSpeed += speed(location, prev)
+		avgSpeed = avgSpeed.fdiv(segment.length)
+	return avgSpeed
 end
