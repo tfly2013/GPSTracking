@@ -68,11 +68,22 @@ function zoomToTrip(){
 
 function addSegmentsToAccordion(){
 	for (var i = 0; i < trip.length ; i++){
+		$("[title]").tooltip();
 		$("#accordion")
 		.append("<h3 id="+ i +">Segment " + (i + 1) + "</h3>" +
 			"<div><label class='control-label'>Transportation</label>" +
 			"<input type='text' id=transportation-"+ i +
 			" class='form-control' value="+ trip[i].transportation +" /></div>");
+		$("#" + i).draggable({
+			containment: "parent", 
+			revert: "invalid", 
+			helper: "clone"
+		});
+		$("#" + i).droppable({
+			accept: "#" + (i - 1) +", #" + (i + 1),
+			activeClass: "segment-drop-active",
+			hoverClass: "segment-drop-hover"
+		});
 	}
 	$("#accordion").accordion({
 		collapsible: true,
@@ -277,7 +288,7 @@ function saveTrip(){
 		segment.id = trip[i].id;
 		segment.transportation = $("#transportation-" + i)[0].value;
 		segment.order = i + 1;
-		var locations = []
+		var locations = [];
 		// The last point is the repeat of the first point of next segment
 		for (var j = 0; j < trip[i].length - 1; j++){
 			var location = {};
@@ -298,12 +309,10 @@ function saveTrip(){
 		data: JSON.stringify({trip: tripData}),
 		contentType: "application/json",
 		dataType: "json",
-		success: function(){
-			alert("Trip updated successfully.");
+		success: function(){			
 			window.location.replace(tripUrl);
 		},
 		error: function(){
-			alert("Something wrong happened, please try again.");
 			window.location.replace(tripUrl);
 		}
 	});

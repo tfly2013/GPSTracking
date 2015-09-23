@@ -47,11 +47,11 @@
   <div role="form">
     <div id="accordion"></div>
     <br />
-    <button class="btn btn-primary btn-sm" onclick="saveTrip()">Save Trip</button>
+    <button class="btn btn-primary btn-sm" onclick="saveTrip()" title="All changes to each segment will be saved.">Save Trip</button>
   </div>
 </div>
 <script type="text/javascript">
   var trip =<%= raw @tripJson.to_json %>;
-  var tripUrl = "<%= trip_path(@trip) %>";
-  $(initMap());
+    var tripUrl = "<%= trip_path(@trip) %>";
+    $(initMap());
 </script>

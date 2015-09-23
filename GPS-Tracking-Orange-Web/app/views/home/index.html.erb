@@ -1,4 +1,38 @@
-<div class="page-header">
-	<h1>GPS Track Orange</h1>
-</div>
-<h3>Home Page</h3>
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GPS Track - Home</title>
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+    <%= javascript_include_tag "https://maps.googleapis.com/maps/api/js?key=AIzaSyA-10-w06yl2bTDNkIPGT0sD52X32pAyZE&libraries=geometry,places", :type => "text/javascript" %>
+    <%= javascript_include_tag "https://google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.1.2/src/markerclusterer_packed.js", :type => "text/javascript" %>
+    <%= csrf_meta_tags %>
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <%= render 'layouts/navigation' %>
+        <div class="header-content">
+          <h1>GPS Track</h1>
+          <h2>Trip tracking and reporting system</h2>
+          <% if user_signed_in? %>
+            <%= link_to trips_path, class: "btn btn-primary btn-lg" do %>
+              <strong>View My Trips </strong><i class="fa fa-arrow-right"></i>
+            <% end %>
+          <% else %>
+            <%= link_to new_user_session_path, class: "btn btn-primary btn-lg sign-btn" do %>
+              <strong>Sign In </strong><i class="fa fa-arrow-right"></i>
+            <% end %>
+            <%= link_to new_user_registration_path, class: "btn btn-primary btn-lg sign-btn" do %>
+              <strong>Sign Up </strong><i class="fa fa-arrow-right"></i>
+            <% end %>
+          <% end %>
+        </div>
+      </header>
+      <main role="main">
+        <%= render 'layouts/messages' %>
+      </main>      
+    </div>
+    <%= render 'layouts/footer' %>
+  </body>
+</html>

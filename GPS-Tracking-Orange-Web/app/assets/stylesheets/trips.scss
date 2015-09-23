@@ -16,3 +16,14 @@
  	padding: 10px;
  	border-radius: 8px;
  }
+ .segment-drop-active{
+ 	background: #707070;
+ 	color: #FFFFFF;
+ }
+ .segment-drop-hover{
+ 	background: #FFFFFF;
+ 	color: #555555;
+ }
+ #accordion{
+ 	overflow: auto;
+ }

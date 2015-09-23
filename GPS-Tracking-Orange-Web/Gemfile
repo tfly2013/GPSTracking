@@ -6,9 +6,10 @@ gem 'simple_token_authentication'
 gem 'bootstrap-sass'
 gem 'font-awesome-sass'
 gem 'jquery-ui-rails'
+gem 'gritter'
 
-# geocoder
-gem 'geocoder', '~> 1.2.11'
+gem 'delayed_job_active_record'
+gem 'daemons'
 
 # Database
 gem 'pg'
@@ -52,12 +53,13 @@ gem 'byebug'
   gem 'web-console', '~> 2.0'
 
   gem 'rspec-rails', '~> 3.0'
+
+  gem 'json_spec', '~> 1.1.4'
+  #gem 'rspec-mocks', '~> 2.11.3'
 end
 
 group :production do
-	gem 'rails_12factor' 
-	gem 'delayed_job_active_record'
-	gem 'daemons'
+	gem 'rails_12factor'
 end 
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

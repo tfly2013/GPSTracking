@@ -26,6 +26,7 @@ module TripsHelper
     			end
     			if unclear
     				if avgSpeed4CurSegment - avgSpeed4PrevSegment > 10
+              # the diff between the speeds are greater than 10
     					#Has changed transportation
     					trip << segment
     					segment.clear
@@ -55,6 +56,7 @@ module TripsHelper
     				avgSpeed4PrevSegment = speedRecorder
     				avgSpeed4CurSegment = 0
     				stoppingTime = 0
+            # ? stop for 5 mins but dont know if the transportation changes
     			elsif stoppingTime != 0 && location.time - stoppingTime < 5 #Concept Only, user starts moving from stopping and stopping time is less than 5 mins
     				unclear = true
     				tempStoppingSegment << location
@@ -72,6 +74,10 @@ module TripsHelper
     	end
     	prev = location
     end
+
+    # >>>>>>>>>>>>>>>>>>>>>>>>>>
+    segment << location
+    trip << segment
     return trip
 
   end
