@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <% segment.locations.each do |location| %>
+          <% segment.locations.order(:order).each do |location| %>
             <tr>
               <td><%= location.latitude %></td>
               <td><%= location.longitude %></td>
