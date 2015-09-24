@@ -2,6 +2,7 @@ package gps.tracking.android.orange;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -36,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnStart;
     private Button btnStop;
     private SQLiteDatabase db;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         userPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
         db = new LocationsDbHelper(this).getReadableDatabase();
+
+        progressDialog = new ProgressDialog(MainActivity.this,
+                R.style.Theme_AppCompat_Dialog);
+        progressDialog.setIndeterminate(true);
 
         btnStart = (Button) findViewById(R.id.btn_trip_start);
         btnStop = (Button) findViewById(R.id.btn_trip_stop);
@@ -80,9 +87,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void signOut() {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.DELETE, VolleyHelper.LOGOUT_URL, new JSONObject(), new Response.Listener<JSONObject>() {
+                (Request.Method.DELETE, NetHelper.LOGOUT_URL, new JSONObject(), new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        progressDialog.dismiss();
                         try {
                             if (response.getBoolean("success")) {
                                 userPreferences.edit().clear().apply();
@@ -90,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
                                 startActivity(intent);
                                 finish();
                             }
-                            Toast.makeText(getApplicationContext(), response.getString("info"), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Signed out", Toast.LENGTH_LONG).show();
                         } catch (Exception e) {
                             // something went wrong: show a Toast with the exception message
                             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
@@ -100,7 +108,14 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getApplicationContext(), error.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                        progressDialog.dismiss();
+                        int errorCode = -1;
+                        if (error.networkResponse != null)
+                            errorCode = error.networkResponse.statusCode;
+                        if (errorCode == -1)
+                            Toast.makeText(getApplicationContext(), "Please check your network connectivity.", Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(getApplicationContext(), "Error code:" + errorCode + ",please try again .", Toast.LENGTH_LONG).show();
                     }
                 }) {
             @Override
@@ -115,7 +130,9 @@ public class MainActivity extends AppCompatActivity {
                 return params;
             }
         };
-        VolleyHelper.getInstance(this).addToRequestQueue(jsObjRequest);
+        progressDialog.setMessage("Signing out...");
+        progressDialog.show();
+        NetHelper.getInstance(this).addToRequestQueue(jsObjRequest);
     }
 
     private boolean isServiceRunning(Class<?> serviceClass) {
@@ -142,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         if (jsonObj != null)
             sendData(jsonObj);
         else
-            Toast.makeText(this,"No data available", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "No data available", Toast.LENGTH_LONG).show();
 
         view.setVisibility(View.GONE);
         btnStart.setVisibility(View.VISIBLE);
@@ -199,15 +216,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendData(final JSONObject jsonObj) {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.POST, VolleyHelper.TRIP_URL, jsonObj, new Response.Listener<JSONObject>() {
+                (Request.Method.POST, NetHelper.TRIP_URL, jsonObj, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        progressDialog.dismiss();
                         Toast.makeText(MainActivity.this, "Your trip is sent successfully.", Toast.LENGTH_LONG).show();
                     }
                 }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        progressDialog.dismiss();
                         buildAlertMessageNetworkError(error, jsonObj);
                     }
                 }) {
@@ -223,7 +242,9 @@ public class MainActivity extends AppCompatActivity {
                 return params;
             }
         };
-        VolleyHelper.getInstance(MainActivity.this).addToRequestQueue(jsObjRequest);
+        progressDialog.setMessage("Sending data...");
+        progressDialog.show();
+        NetHelper.getInstance(MainActivity.this).addToRequestQueue(jsObjRequest);
     }
 
     private void buildAlertMessageNoGps() {
@@ -247,13 +268,10 @@ public class MainActivity extends AppCompatActivity {
     private void buildAlertMessageNetworkError(VolleyError error, final JSONObject jsonObj) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         int errorCode = -1;
-        String errorMessage = null;
-        if (error.networkResponse != null) {
+        if (error.networkResponse != null)
             errorCode = error.networkResponse.statusCode;
-            errorMessage = error.getMessage();
-        }
-        builder.setMessage(String.format("Network Error: Code: %d, Message: %s.WARNING: You would lose ALL DATA of this trip if you choose to cancel. ",
-                errorCode, errorMessage))
+        builder.setMessage(String.format("Send data failed, error code: %d.WARNING: You would lose ALL DATA of this trip if you choose to cancel. ",
+                errorCode))
                 .setCancelable(false)
                 .setPositiveButton("Try again", new DialogInterface.OnClickListener() {
                     public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
@@ -267,5 +285,10 @@ public class MainActivity extends AppCompatActivity {
                 });
         final AlertDialog alert = builder.create();
         alert.show();
+    }
+
+    public void onTitleClick(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(NetHelper.DOMAIN));
+        startActivity(browserIntent);
     }
 }

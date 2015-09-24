@@ -1,20 +1,18 @@
 package gps.tracking.android.orange;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.app.ProgressDialog;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -49,8 +47,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
+    private ProgressDialog progressDialog;
+    private View mLoginView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,15 +56,20 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         setContentView(R.layout.activity_login);
 
         userPreferences = getSharedPreferences("CurrentUser", MODE_PRIVATE);
+        progressDialog = new ProgressDialog(LoginActivity.this,
+                R.style.Theme_AppCompat_Dialog);
+        progressDialog.setIndeterminate(true);
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
+        mLoginView = findViewById(R.id.login_form);
+        mLoginView.setVisibility(View.GONE);
 
         // Try to Login with token
         String email = userPreferences.getString("Email", null);
         String token = userPreferences.getString("AuthToken", null);
         if (email != null && token != null)
             loginWithToken(email, token);
+        else
+            mLoginView.setVisibility(View.VISIBLE);
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -153,40 +156,39 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         JSONObject jsonObj = new JSONObject(params);
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.POST, VolleyHelper.LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
+                (Request.Method.POST, NetHelper.LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        progressDialog.dismiss();
                         try {
                             if (response.getBoolean("success")) {
-                                // everything is ok
-                                // launch the HomeActivity and close this one
                                 Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                                 startActivity(intent);
                                 finish();
-                            }
-                            Toast.makeText(getApplicationContext(), response.getString("info"), Toast.LENGTH_LONG).show();
+                            } else
+                                mLoginView.setVisibility(View.VISIBLE);
                         } catch (Exception e) {
-                            // something went wrong: show a Toast with the exception message
                             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                            showProgress(false);
+                            mLoginView.setVisibility(View.VISIBLE);
                         }
                     }
                 }, new Response.ErrorListener() {
-
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         int errorCode = -1;
                         if (error.networkResponse != null)
                             errorCode = error.networkResponse.statusCode;
-                            Toast.makeText(getApplicationContext(), errorCode + "", Toast.LENGTH_LONG).show();
-                        showProgress(false);
+                        Log.e("Login", "Login with token failed, error code " + errorCode);
+                        progressDialog.dismiss();
+                        mLoginView.setVisibility(View.VISIBLE);
                     }
                 });
         // Show a progress spinner, and kick off a background task to
         // perform the user login attempt.
-        showProgress(true);
+        progressDialog.setMessage("Loading...");
+        progressDialog.show();
         // Access the RequestQueue through your singleton class.
-        VolleyHelper.getInstance(this).addToRequestQueue(jsObjRequest);
+        NetHelper.getInstance(this).addToRequestQueue(jsObjRequest);
     }
 
     private void loginWithPassword(String email, String password) {
@@ -202,9 +204,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         }
 
         JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                (Request.Method.POST, VolleyHelper.LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
+                (Request.Method.POST, NetHelper.LOGIN_URL, jsonObj, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        progressDialog.dismiss();
                         try {
                             if (response.getBoolean("success")) {
                                 // everything is ok
@@ -218,76 +221,55 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                                 startActivity(intent);
                                 finish();
                             }
-                            Toast.makeText(getApplicationContext(), response.getString("info"), Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), "Signed in", Toast.LENGTH_LONG).show();
                         } catch (Exception e) {
                             // something went wrong: show a Toast
                             // with the exception message
-                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                            showProgress(false);
+                            Toast.makeText(getApplicationContext(), "Internal error, please try again.", Toast.LENGTH_LONG).show();
                         }
                     }
                 }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        progressDialog.dismiss();
                         int errorCode = -1;
                         if (error.networkResponse != null)
                             errorCode = error.networkResponse.statusCode;
-                        Toast.makeText(getApplicationContext(), errorCode + "", Toast.LENGTH_LONG).show();
-                        showProgress(false);
+                        switch (errorCode) {
+                            case -1:
+                                Toast.makeText(getApplicationContext(), "Please check your network connectivity.", Toast.LENGTH_LONG).show();
+                            case 401:
+                                Toast.makeText(getApplicationContext(), "Invalid email or password.", Toast.LENGTH_LONG).show();
+                            default:
+                                Toast.makeText(getApplicationContext(), "Error code:" + errorCode + ",please try again .", Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
         // Show a progress spinner, and kick off a background task to
         // perform the user login attempt.
-        showProgress(true);
+        progressDialog.setMessage("Signing in...");
+        progressDialog.show();
         // Access the RequestQueue through your singleton class.
-        VolleyHelper.getInstance(this).addToRequestQueue(jsObjRequest);
+        NetHelper.getInstance(this).addToRequestQueue(jsObjRequest);
     }
 
     private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() >= 8;
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    public void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+    public void onSignUp(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(NetHelper.SIGNUP_URL));
+        startActivity(browserIntent);
+    }
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+    public void onTitleClick(View view) {
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(NetHelper.DOMAIN));
+        startActivity(browserIntent);
     }
 
     @Override
@@ -315,7 +297,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             emails.add(cursor.getString(ProfileQuery.ADDRESS));
             cursor.moveToNext();
         }
-
         addEmailsToAutoComplete(emails);
     }
 
@@ -329,9 +310,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
                 ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
         };
-
         int ADDRESS = 0;
-        int IS_PRIMARY = 1;
     }
 
 
