@@ -2,6 +2,7 @@ class Trip < ActiveRecord::Base
   belongs_to :user
   has_many :segments
   has_many :locations, :through => :segments 
+  after_initialize :set_validated, :if => :new_record?
 
   LOW_SPEED = 0.83
   WALKING = 2.22
@@ -264,6 +265,10 @@ class Trip < ActiveRecord::Base
     distance = r * c
     return distance
   end
+
+  def set_validated
+    self.validated ||= false
+  end  
 
   def snap_to_road
     all = self.locations.to_ary
