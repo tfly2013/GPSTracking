@@ -69,11 +69,6 @@ function zoomToTrip(){
 function addSegmentsToAccordion(){
 	for (var i = 0; i < trip.length ; i++){
 		$("[title]").tooltip();
-		$("#accordion")
-		.append("<h3 id="+ i +">Segment " + (i + 1) + "</h3>" +
-			"<div><label class='control-label'>Transportation</label>" +
-			"<input type='text' id=transportation-"+ i +
-			" class='form-control' value="+ trip[i].transportation +" /></div>");
 		$("#" + i).draggable({
 			containment: "parent", 
 			revert: "invalid", 

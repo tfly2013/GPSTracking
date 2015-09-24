@@ -34,7 +34,7 @@ class ReportsController < ApplicationController
         avgSpeed += segment.avgSpeed
       end
     end
-    return avgSpeed.fdiv(segments.count)
+    return avgSpeed.fdiv(segments.count).round(2)
 
   end
 

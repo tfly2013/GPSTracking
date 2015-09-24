@@ -7,6 +7,7 @@ class TripsController < ApplicationController
   def create
     @trip = Trip.new
     @trip.user = current_user
+    @trip.validated = false
     @segment = Segment.new
     @segment.trip = @trip
     @segment.order = 0

@@ -3,7 +3,7 @@
 </div>
 <div class="row">
   <h3>For development use only:</h3>
-  <% @trip.segments.each_with_index do |segment,index| %>
+  <% @trip.segments.order(:order).each_with_index do |segment,index| %>
     <h3>Segment <%= index + 1 %> </h3>
     <div class="cloumn">
       <table class="table table-striped">
@@ -35,13 +35,41 @@
 <div id="map-control">
   <h3>Trip</h3>
   <div role="form">
-    <div id="accordion"></div>
+    <div id="accordion">
+      <% @trip.segments.order(:order).each_with_index do |segment,index| %>
+        <h3 id = <%= index %>> Segment <%= index + 1 %> </h3>
+        <div>
+          <% if !segment.startTime.nil? %>
+            <label class='control-label'>Start Time</label>
+            <p><%= segment.startTime.localtime.strftime("%I:%M %P") %></p>
+          <% end %>
+          <% if !segment.endTime.nil? %>
+            <label class='control-label'>End Time</label>
+            <p><%= segment.endTime.localtime.strftime("%I:%M %P") %></p>
+          <% end %>
+          <% if !segment.distance.nil? %>
+            <label class='control-label'>Distance</label>
+            <p><%= segment.distance.round(2) %> m</p>
+          <% end %>
+          <% if !segment.highestSpeed.nil? %>
+            <label class='control-label'>Highest Speed</label>
+            <p><%= segment.highestSpeed.round(2) %> m/s</p>
+          <% end %>
+          <% if !segment.avgSpeed.nil? %>
+            <label class='control-label'>Average Speed</label>
+            <p><%= segment.avgSpeed.round(2) %> m/s</p>
+          <% end %>
+          <label class='control-label'>Transportation</label>
+          <input type='text' id = transportation-<%= index %> class='form-control' value='<%= segment.transportation %>' />
+        </div>
+      <% end %>
+    </div>
     <br />
     <button class="btn btn-primary btn-sm" onclick="saveTrip()" title="All changes to each segment will be saved.">Save Trip</button>
   </div>
 </div>
 <script type="text/javascript">
   var trip =<%= raw @tripJson.to_json %>;
-        var tripUrl = "<%= trip_path(@trip) %>";
-        $(initMap());
+          var tripUrl = "<%= trip_path(@trip) %>";
+          $(initMap());
 </script>

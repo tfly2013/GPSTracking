@@ -14,9 +14,9 @@
           </tr>
         </thead>
         <tbody>
-          <% @unvalidated.each_with_index do |trip, index| %>
+          <% @unvalidated.each do |trip| %>
             <tr>
-              <td>Trip <%= index + 1 %></td>
+              <td>Trip <%= @trips.index(trip) + 1 %></td>
               <td><%= trip.created_at.to_date %></td>
               <td><%= link_to 'Show', trip, :class =>  'btn btn-primary' %>
                 <% if current_user.try(:admin?) %>
@@ -43,9 +43,9 @@
           </tr>
         </thead>
         <tbody>
-          <% @validated.each_with_index do |trip, index| %>
+          <% @validated.each do |trip| %>
             <tr>
-              <td>Trip <%= index + 1 %></td>
+              <td>Trip <%= @trips.index(trip) + 1 %></td>
               <td><%= trip.created_at.to_date %></td>
               <td><%= link_to 'Show', trip, :class =>  'btn btn-primary' %>
                 <% if current_user.try(:admin?) %>
