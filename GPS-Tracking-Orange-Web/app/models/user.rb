@@ -10,6 +10,8 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
   has_many :trips
 
+  validates :role, inclusion: { in: User.roles.keys }
+
 
   def set_default_role
     self.role ||= :user

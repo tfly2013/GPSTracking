@@ -2,26 +2,62 @@
   <h1>Trips</h1>
 </div>
 <div class="row">
-  <div class="column">
-    <table class="table table-striped">
-      <thead>
-        <tr>
-          <th>Trip</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @trips.each do |trip| %>
+  <% if !@unvalidated.empty? %>
+    <h3>Trips To Validate</h3>
+    <div class="column">
+      <table class="table table-striped">
+        <thead>
           <tr>
-            <td>Trip <%= @trips.index(trip) + 1 %></td>
-            <td><%= link_to 'Show', trip, :class =>  'btn btn-primary' %>
-              <% if current_user.try(:admin?) %>
-                <%= link_to 'Delete', trip, :method=> :delete, :data => { confirm: 'Are you sure?'}, :class => 'btn btn-danger' %>
-              <% end %>
-            </td>
+            <th>Trip</th>
+            <th>Date</th>
+            <th>Action</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          <% @unvalidated.each do |trip| %>
+            <tr>
+              <td>Trip <%= @trips.index(trip) + 1 %></td>
+              <td><%= trip.created_at.to_date %></td>
+              <td><%= link_to 'Show', trip, :class =>  'btn btn-primary' %>
+                <% if current_user.try(:admin?) %>
+                  <%= link_to 'Delete', trip, :method=> :delete, :data => { confirm: 'Are you sure?'}, :class => 'btn btn-danger' %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>
+<div class="row">
+  <% if !@validated.empty? %>
+    <h3>Validated Trips</h3>
+    <div class="column">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Trip</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @validated.each do |trip| %>
+            <tr>
+              <td>Trip <%= @trips.index(trip) + 1 %></td>
+              <td><%= trip.created_at.to_date %></td>
+              <td><%= link_to 'Show', trip, :class =>  'btn btn-primary' %>
+                <% if current_user.try(:admin?) %>
+                  <%= link_to 'Delete', trip, :method=> :delete, :data => { confirm: 'Are you sure?'}, :class => 'btn btn-danger' %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <h4>No validated trips yet.</h4>
+  <% end %>
 </div>

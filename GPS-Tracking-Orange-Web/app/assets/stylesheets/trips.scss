@@ -1,3 +1,29 @@
 // Place all the styles related to the Trips controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+ //Map
+ .map-container{
+ 	width: 100%;
+ }
+ #map {
+ 	width: 100%;
+ 	height: 600px;
+ }
+ #map-control {
+ 	width: 240px;
+ 	background-color: rgba(255, 255, 255, 0.75);
+ 	margin: 8px;
+ 	padding: 10px;
+ 	border-radius: 8px;
+ }
+ .segment-drop-active{
+ 	background: #707070;
+ 	color: #FFFFFF;
+ }
+ .segment-drop-hover{
+ 	background: #FFFFFF;
+ 	color: #555555;
+ }
+ #accordion{
+ 	overflow: auto;
+ }

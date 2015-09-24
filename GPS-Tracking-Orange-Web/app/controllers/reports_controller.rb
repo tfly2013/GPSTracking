@@ -5,10 +5,10 @@ class ReportsController < ApplicationController
   # GET /reports
   # GET /reports.json
   def index
-    trips = Trip.all
-    @average_distance = average_distance(trips)
-    @average_speed = average_speed(trips)
-    @modes = modes_count(trips)
+    segments = Segment.all
+    @average_distance = average_distance(segments)
+    @average_speed = average_speed(segments)
+    @modes = modes_count(segments)
   end
 
   def admin_and_researcher_only
@@ -17,21 +17,32 @@ class ReportsController < ApplicationController
     end
   end
 
-  def average_distance(trips)
-    return 1000
+  def average_distance(segments)
+    distance = 0
+    segments.each do |segment|
+      if !segment.distance.nil?
+        distance += segment.distance
+      end      
+    end
+    return distance.div(segments.count)
   end
 
-  def average_speed(trips)
-    return 50
+  def average_speed(segments)
+    avgSpeed = 0
+    segments.each do |segment|
+      if !segment.avgSpeed.nil?
+        avgSpeed += segment.avgSpeed
+      end
+    end
+    return avgSpeed.fdiv(segments.count).round(2)
+
   end
 
-  def modes_count(trips)
+  def modes_count(segments)
     modes = Hash.new(0)
-    trips.each do |trip|
-      trip.segments.each do |segment|
-        if segment.transportation != nil
-          modes[segment.transportation]+=1
-        end
+    segments.each do |segment|
+      if !segment.transportation.nil?
+        modes[segment.transportation.downcase]+=1
       end
     end
     return modes

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150911115012) do
+ActiveRecord::Schema.define(version: 20150919021811) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -40,27 +40,32 @@ ActiveRecord::Schema.define(version: 20150911115012) do
     t.integer  "segment_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer  "order"
+    t.float    "speed"
   end
 
   add_index "locations", ["segment_id"], name: "index_locations_on_segment_id", using: :btree
 
   create_table "segments", force: :cascade do |t|
-    t.integer  "startLocation"
-    t.integer  "endLocation"
     t.string   "transportation"
     t.integer  "trip_id"
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
+    t.integer  "order"
+    t.datetime "startTime"
+    t.datetime "endTime"
+    t.float    "avgSpeed"
+    t.float    "highestSpeed"
+    t.float    "distance"
   end
 
   add_index "segments", ["trip_id"], name: "index_segments_on_trip_id", using: :btree
 
   create_table "trips", force: :cascade do |t|
-    t.integer  "startLocation"
-    t.integer  "endLocation"
     t.integer  "user_id"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean  "validated"
   end
 
   add_index "trips", ["user_id"], name: "index_trips_on_user_id", using: :btree

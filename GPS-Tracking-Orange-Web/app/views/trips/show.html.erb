@@ -1,29 +1,27 @@
-<div class="page-header">
-  <h1>Trip</h1>
-</div>
-<div class="map-container row">
-  <div class="cloumn" id="map"></div>
+<div class="map-container">
+  <div id="map"></div>
 </div>
 <div class="row">
-  <% @trip.segments.each do |segment| %>
-    <h3>Segment <%= @trip.segments.index(segment) + 1 %>
-      <%= link_to 'Edit', edit_trip_segment_path(@trip, segment), :class => 'btn btn-primary' %>
-      <%= link_to 'Delete', trip_segment_path(@trip, segment), method: :delete, data: { confirm: 'Are you sure?'}, :class => 'btn btn-danger' %></h3>
+  <h3>For development use only:</h3>
+  <% @trip.segments.order(:order).each_with_index do |segment,index| %>
+    <h3>Segment <%= index + 1 %> </h3>
     <div class="cloumn">
       <table class="table table-striped">
         <thead>
           <tr>
             <th>Latitude</th>
             <th>Longitude</th>
+            <th>Speed</th>
             <th>Accuracy</th>
             <th>Time</th>
           </tr>
         </thead>
         <tbody>
-          <% segment.locations.each do |location| %>
+          <% segment.locations.order(:order).each do |location| %>
             <tr>
               <td><%= location.latitude %></td>
               <td><%= location.longitude %></td>
+              <td><%= location.speed %></td>
               <td><%= location.accuracy %></td>
               <td><%= location.time %></td>
             </tr>
@@ -31,20 +29,47 @@
         </tbody>
       </table>
     </div>
-    <%= form_for @trip, url: trip_path(@trip), method: :patch, html: {class: "form seg-form-" + segment.id.to_s, style: "display: none" } do |f| %>
-      <%= f.fields_for :segments, segment do |sf| %>
-        <div class="form-group">
-          <%= sf.label :transportation %>
-          <%= sf.text_field :transportation, autofocus: true, class: "form-control" %>
+  <% end %>
+  <br />
+</div>
+<div id="map-control">
+  <h3>Trip</h3>
+  <div role="form">
+    <div id="accordion">
+      <% @trip.segments.order(:order).each_with_index do |segment,index| %>
+        <h3 id = <%= index %>> Segment <%= index + 1 %> </h3>
+        <div>
+          <% if !segment.startTime.nil? %>
+            <label class='control-label'>Start Time</label>
+            <p><%= segment.startTime.localtime.strftime("%I:%M %P") %></p>
+          <% end %>
+          <% if !segment.endTime.nil? %>
+            <label class='control-label'>End Time</label>
+            <p><%= segment.endTime.localtime.strftime("%I:%M %P") %></p>
+          <% end %>
+          <% if !segment.distance.nil? %>
+            <label class='control-label'>Distance</label>
+            <p><%= segment.distance.round(2) %> m</p>
+          <% end %>
+          <% if !segment.highestSpeed.nil? %>
+            <label class='control-label'>Highest Speed</label>
+            <p><%= segment.highestSpeed.round(2) %> m/s</p>
+          <% end %>
+          <% if !segment.avgSpeed.nil? %>
+            <label class='control-label'>Average Speed</label>
+            <p><%= segment.avgSpeed.round(2) %> m/s</p>
+          <% end %>
+          <label class='control-label'>Transportation</label>
+          <input type='text' id = transportation-<%= index %> class='form-control' value='<%= segment.transportation %>' />
         </div>
       <% end %>
-      <%= f.submit "Change", class: "btn btn-primary" %>
-    <% end %>
-  <% end %>
+    </div>
+    <br />
+    <button class="btn btn-primary btn-sm" onclick="saveTrip()" title="All changes to each segment will be saved.">Save Trip</button>
+  </div>
 </div>
 <script type="text/javascript">
-  var coordinates =<%= raw @coordinates.to_json %>;
-  $(initMap());
+  var trip =<%= raw @tripJson.to_json %>;
+          var tripUrl = "<%= trip_path(@trip) %>";
+          $(initMap());
 </script>
-<%= link_to 'New', new_trip_segment_path(@trip), :class => 'btn btn-primary' %>
-<%= link_to 'Back', trips_path, :class => 'btn btn-info' %>
