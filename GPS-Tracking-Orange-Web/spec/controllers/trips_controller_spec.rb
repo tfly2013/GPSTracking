@@ -28,21 +28,21 @@ RSpec.describe TripsController, type: :controller do
   # in order to pass any filters (e.g. authentication) defined in
   # TripsController. Be sure to keep this updated too.
 
-  describe "GET #index" do
-    it "sign in as user get all trips as @trips" do
-      pending ("no view match this")
-      @request.headers["Accept"] = "application/json"
-      @request.env["CONTENT_TYPE"] = "application/json"
-      user=login_user
-      trip = Trip.find_by(user: user.id)
-      get :index
-    #       @trips = current_user.trips
-    # @unvalidated = @trips.where(:validated => false)
-    # @validated = @trips.where(:validated => true)
-      expect(response).to have_http_status(200)
-      expect(response).to be_success
-    end
-  end
+  # describe "GET #index" do
+    # it "sign in as user get all trips as @trips" do
+      # pending ("no view match this")
+      # @request.headers["Accept"] = "application/json"
+      # @request.env["CONTENT_TYPE"] = "application/json"
+      # user=login_user
+      # trip = Trip.find_by(user: user.id)
+      # get :index
+    # #       @trips = current_user.trips
+    # # @unvalidated = @trips.where(:validated => false)
+    # # @validated = @trips.where(:validated => true)
+      # expect(response).to have_http_status(200)
+      # expect(response).to be_success
+    # end
+  # end
 
   describe "GET #show" do
     it "assigns the requested trip as @trip" do
@@ -67,17 +67,17 @@ RSpec.describe TripsController, type: :controller do
   #   end
   # end
 
-  describe "GET #edit" do
-    it "assigns the requested trip as @trip" do
-      pending("there is no routing match this routing")
-      user = login_user
-      my_trip = build_trip(user.id)
-      get :edit, {:id => my_trip.id}
-      expect(response).to have_http_status(200)
-      expect(response).to be_success
-      expect(assigns(:trip)).to eq(my_trip)
-    end
-  end
+  # describe "GET #edit" do
+    # it "assigns the requested trip as @trip" do
+      # pending("there is no routing match this routing")
+      # user = login_user
+      # my_trip = build_trip(user.id)
+      # get :edit, {:id => my_trip.id}
+      # expect(response).to have_http_status(200)
+      # expect(response).to be_success
+      # expect(assigns(:trip)).to eq(my_trip)
+    # end
+  # end
 
   describe "POST #create" do
     context "with valid params" do
