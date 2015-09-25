@@ -17,7 +17,10 @@ class UsersController < ApplicationController
 
   def update
     @user = User.find(params[:id])
-    if user_params[:role] >= 0 && user_params[:role] <= 2  && @user.update(user_params)
+    # there the role can not be int, although the role is int 
+    # but should use :role => User.roles.keys.to_a[1] like this 
+    if user_params[:role].to_i >= 0 && user_params[:role].to_i <= 2  && @user.update(user_params)
+    # if user_params[:role] >= 0 && user_params[:role] <= 2  && @user.update(user_params)
       redirect_to users_path, :notice => "User updated."
     else
       redirect_to users_path, :alert => "Unable to update user."

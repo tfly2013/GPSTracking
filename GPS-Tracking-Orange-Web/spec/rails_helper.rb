@@ -26,6 +26,9 @@ Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
 RSpec.configure do |config|
   config.include Devise::TestHelpers, type: :controller
   config.include ControllerMacros, type: :controller
+  # config.include Devise::TestHelpers, type: :request
+  config.include RequestMacros, type: :request
+
 end
 
 # Checks for pending migrations before tests are run.

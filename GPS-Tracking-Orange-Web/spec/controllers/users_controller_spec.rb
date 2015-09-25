@@ -39,7 +39,6 @@ RSpec.describe UsersController, type: :controller do
   # This should return the minimal set of values that should be in the session
   # in order to pass any filters (e.g. authentication) defined in
   # UsersController. Be sure to keep this updated too.
-  let(:valid_session) { {} }
 
   describe "GET #index" do
     it "did not sign in then denied" do
@@ -138,9 +137,11 @@ RSpec.describe UsersController, type: :controller do
 
       it "updates the requested user successfully" do
       	build_many_user
-        user = login_admin
+        users = login_admin
         ano_user = User.all.first
+        # expect(User.roles.keys.to_a[1]).to eq(1)
         put :update, :id => ano_user.id, :user => {:role => User.roles.keys.to_a[1]}
+        # put :update, :id => ano_user.id, :user => {:role => 1}
         ano_user.reload
         expect(ano_user['role']).to eq(1)
         expect(response).to redirect_to(users_path)
@@ -184,6 +185,8 @@ RSpec.describe UsersController, type: :controller do
         user = login_admin
         ano_user = User.all.first
         put :update, :id => ano_user.id, :user => {:role => User.roles.keys.to_a[6]}
+        # put :update, :id => ano_user.id, :user => {:role => 6}
+
         expect(response).not_to have_http_status(200)
         expect(response).to have_http_status(302)
         expect(response).not_to be_success

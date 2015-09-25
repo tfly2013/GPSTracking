@@ -1,4 +1,6 @@
-module ControllerMacros
+# include Warden::Test::Helpers
+
+module RequestMacros
 	
 	def login_user
         @request.env["devise.mapping"] = Devise.mappings[:user]

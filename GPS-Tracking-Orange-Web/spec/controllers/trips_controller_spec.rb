@@ -23,33 +23,31 @@ RSpec.describe TripsController, type: :controller do
   # This should return the minimal set of attributes required to create a valid
   # Trip. As you add validations to Trip, be sure to
   # adjust the attributes here as well.
-  let(:valid_attributes) {
-    skip("Add a hash of attributes valid for your model")
-  }
-
-  let(:invalid_attributes) {
-    skip("Add a hash of attributes invalid for your model")
-  }
 
   # This should return the minimal set of values that should be in the session
   # in order to pass any filters (e.g. authentication) defined in
   # TripsController. Be sure to keep this updated too.
-  let(:valid_session) { {} }
 
   describe "GET #index" do
     it "sign in as user get all trips as @trips" do
+      pending ("no view match this")
       @request.headers["Accept"] = "application/json"
       @request.env["CONTENT_TYPE"] = "application/json"
       user=login_user
       trip = Trip.find_by(user: user.id)
-      # get :index, {}, valid_session
-      expect(assigns(:trips)).to eq(trip)
+      get :index
+    #       @trips = current_user.trips
+    # @unvalidated = @trips.where(:validated => false)
+    # @validated = @trips.where(:validated => true)
+      expect(response).to have_http_status(200)
+      expect(response).to be_success
     end
   end
 
   describe "GET #show" do
     it "assigns the requested trip as @trip" do
       user = login_user
+            # expect(user.id).to eq(1)
       my_trip = build_trip(user.id)
       # server_response = get "/trips/#{my_trip.id}"
        # server_response = get "/trips/new"
@@ -88,15 +86,15 @@ RSpec.describe TripsController, type: :controller do
       @request.headers["Accept"] = "application/json"
       @request.env["CONTENT_TYPE"] = "application/json"
       user=login_user
-      post :create , 
-              {  format: :json,
+      post :create , {  
+        format: :json,
                :locations =>  [ 
                 
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456867 },
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456868 },
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456869 },
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456860 },
-                ]
+                  {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456867 },
+                  {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456868 },
+                  {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456869 },
+                  {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456860 },
+                                ]
               }, as: :json
 
       json = JSON.parse response.body
@@ -147,7 +145,7 @@ RSpec.describe TripsController, type: :controller do
               {  format: :json,
                :locations =>  [ 
                 
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456867 },
+              {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456867 },
                 ]
               }, as: :json
 
@@ -172,11 +170,11 @@ RSpec.describe TripsController, type: :controller do
               {  format: :json,
                :locations =>  [ 
                 
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456867 },
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456868 },
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456869 },
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456860 },
-                ]
+                  {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456867 },
+                  {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456868 },
+                  {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456869 },
+                  {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456860 },
+                                ]
               }, as: :json
 
       json = JSON.parse response.body
@@ -202,7 +200,7 @@ RSpec.describe TripsController, type: :controller do
         post :create , 
               {  format: :json,
                :locations =>  [ 
-              {:latitude => 125.3, :longitude => 120.3, :accuracy => 15.3, :time => 123456867 },
+              {:latitude => 75.3, :longitude => 120.3, :speed => 20.5, :accuracy => 15.3, :time => 123456867 },
                 ]
             }, as: :json
 
@@ -235,46 +233,103 @@ RSpec.describe TripsController, type: :controller do
     end
   end
 
-  # describe "PUT #update" do
-  #   context "with valid params" do
-  #     let(:new_attributes) {
-  #       skip("Add a hash of attributes valid for your model")
-  #     }
+  describe "PUT #update" do
 
-  #     it "updates the requested trip" do
-  #       trip = Trip.create! valid_attributes
-  #       put :update, {:id => trip.to_param, :trip => new_attributes}, valid_session
-  #       trip.reload
-  #       skip("Add assertions for updated state")
-  #     end
+      it "updates the requested trip split it into two parts" do
+      user = login_user
+      my_trip = build_trip(user.id)
+      # server_response = get "/trips/#{my_trip.id}"
+       # server_response = get "/trips/new"
+      # server_response = get :show, {:id => my_trip.id}
+      old_seg= my_trip.segments[0]
+      put :update , 
+              { format: :json,:id => my_trip.id,
+              :trip =>{
+                :segments_attributes => [{:id => old_seg.id, :transportation => "Walk", :order => old_seg.id, 
+                                          :locations_attributes => [{:id => old_seg.locations[0].id, :latitude => -75.3, :longitude => -125.3},
+                                                                    {:id => old_seg.locations[1].id, :latitude => -70.3, :longitude => -120.3},
+                                                                                                  ]},
+                                          {:transportation => "Car", 
+                                          :locations_attributes => [{:id => old_seg.locations[2].id, :latitude => -65.3, :longitude => -115.3},
+                                                                    {:id => old_seg.locations[3].id, :latitude => -60.3, :longitude => -110.3},
+                                                                                                  ]},
+                                        ]
+                      }
+              }, as: :json
 
-  #     it "assigns the requested trip as @trip" do
-  #       trip = Trip.create! valid_attributes
-  #       put :update, {:id => trip.to_param, :trip => valid_attributes}, valid_session
-  #       expect(assigns(:trip)).to eq(trip)
-  #     end
+      my_trip.reload
+      expect(my_trip.segments[0].locations.length).to eq(2)
+      expect(my_trip.segments[1].locations.length).to eq(2)
+      expect(response).to have_http_status(200)
+      expect(response).to be_success
+      expect(assigns(:trip)).to eq(my_trip)
 
-  #     it "redirects to the trip" do
-  #       trip = Trip.create! valid_attributes
-  #       put :update, {:id => trip.to_param, :trip => valid_attributes}, valid_session
-  #       expect(response).to redirect_to(trip)
-  #     end
-  #   end
+      end
 
-  #   context "with invalid params" do
-  #     it "assigns the trip as @trip" do
-  #       trip = Trip.create! valid_attributes
-  #       put :update, {:id => trip.to_param, :trip => invalid_attributes}, valid_session
-  #       expect(assigns(:trip)).to eq(trip)
-  #     end
 
-  #     it "re-renders the 'edit' template" do
-  #       trip = Trip.create! valid_attributes
-  #       put :update, {:id => trip.to_param, :trip => invalid_attributes}, valid_session
-  #       expect(response).to render_template("edit")
-  #     end
-  #   end
-  # end
+      it "updates the requested trip split it into four parts" do
+      user = login_user
+      my_trip = build_trip(user.id)
+
+      old_seg= my_trip.segments[0]
+      put :update , 
+              { format: :json,:id => my_trip.id,
+              :trip =>{
+                :segments_attributes => [{:id => old_seg.id, :transportation => "Walk", :order => old_seg.id, 
+                                          :locations_attributes => [{:id => old_seg.locations[0].id, :latitude => -75.3, :longitude => -125.3},
+                                                                    ]},
+                                           {:transportation => "Walk", :order => old_seg.id, 
+                                          :locations_attributes => [{:id => old_seg.locations[1].id, :latitude => -70.3, :longitude => -120.3},
+                                                                    ]},
+                                          {:transportation => "Bus", 
+                                          :locations_attributes => [{:id => old_seg.locations[2].id, :latitude => -65.3, :longitude => -115.3},
+                                                                    ]},
+                                          {:transportation => "Tram", 
+                                          :locations_attributes => [{:id => old_seg.locations[3].id, :latitude => -60.3, :longitude => -110.3},
+                                                                    ]}                                                        
+                                        ]
+                      }
+              }, as: :json
+
+      my_trip.reload
+      expect(my_trip.segments[0].locations.length).to eq(1)
+      expect(my_trip.segments[1].locations.length).to eq(1)
+      expect(my_trip.segments[2].locations.length).to eq(1)
+      expect(my_trip.segments[3].locations.length).to eq(1)
+      expect(response).to have_http_status(200)
+      expect(response).to be_success
+
+
+      end
+
+    context "with invalid params" do
+
+      it "updates the requested trip substitute it with nothing" do
+      user = login_user
+      my_trip = build_trip(user.id)
+      # server_response = get "/trips/#{my_trip.id}"
+       # server_response = get "/trips/new"
+      # server_response = get :show, {:id => my_trip.id}
+      old_seg= my_trip.segments[0]
+      put :update , 
+              { format: :json,:id => my_trip.id,
+              :trip =>nil
+
+              }, as: :json
+
+      my_trip.reload
+      expect(my_trip.segments[0].startTime).to be_nil
+      expect(my_trip.segments[0].endTime).to be_nil
+      expect(my_trip.segments[0].transportation).to be_nil
+
+      expect(response).to have_http_status(400)
+      expect(response).not_to be_success
+
+
+      end
+
+    end
+  end
 
   # describe "DELETE #destroy" do
   #   it "destroys the requested trip" do
