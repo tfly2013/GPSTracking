@@ -56,6 +56,12 @@ gem 'byebug'
 
   gem 'json_spec', '~> 1.1.4'
   #gem 'rspec-mocks', '~> 2.11.3'
+
+  #to simulate the user's behavior
+  gem "capybara"
+  #to debug the program 
+  gem "launchy", "~> 2.2.0"
+
 end
 
 group :production do

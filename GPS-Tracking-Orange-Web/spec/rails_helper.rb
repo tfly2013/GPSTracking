@@ -28,6 +28,7 @@ RSpec.configure do |config|
   config.include ControllerMacros, type: :controller
   # config.include Devise::TestHelpers, type: :request
   config.include RequestMacros, type: :request
+  config.include Devise::TestHelpers, :type => :view
   # config.include Warden::Test::Helpers, type: :request//new
 
 end
