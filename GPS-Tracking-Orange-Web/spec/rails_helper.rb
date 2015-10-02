@@ -29,6 +29,8 @@ RSpec.configure do |config|
   # config.include Devise::TestHelpers, type: :request
   config.include RequestMacros, type: :request
   config.include Devise::TestHelpers, :type => :view
+
+  config.use_transactional_fixtures = false
   # config.include Warden::Test::Helpers, type: :request//new
 
 end

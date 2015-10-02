@@ -61,6 +61,12 @@ gem 'byebug'
   gem "capybara"
   #to debug the program 
   gem "launchy", "~> 2.2.0"
+  #new driver to handle the JS
+  gem "selenium-webdriver"
+  #let the selenium work
+  gem "database_cleaner"
+
+
 
 end
 
