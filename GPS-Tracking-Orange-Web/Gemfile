@@ -65,9 +65,7 @@ gem 'byebug'
   gem "selenium-webdriver"
   #let the selenium work
   gem "database_cleaner"
-
-
-
+  
 end
 
 group :production do
