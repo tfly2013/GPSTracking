@@ -26,7 +26,7 @@ function initMap(){
 		addSegmentsToAccordion();		
 		testMarkers();
 		drawSegments();
-		drawZones();	
+		drawZones();
 		snapZonesToSegments();
 	});
 }
