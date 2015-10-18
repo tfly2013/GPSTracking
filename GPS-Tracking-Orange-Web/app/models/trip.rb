@@ -20,7 +20,7 @@ class Trip < ActiveRecord::Base
   TRAIN_AVG = 16.66
   CAR_AVG = 16.66
 
-  TRANSPORTATIONS = ["walking", "bicycle", "tram", "bus", "train", "car", "unknown"]
+  TRANSPORTATIONS = ["walk", "bicycle", "tram", "bus", "train", "car", "unknown"]
 
   def SegmentsRecognize
     @trip = self
@@ -76,9 +76,9 @@ class Trip < ActiveRecord::Base
     endSegment(currentSegment)
     # after reorg segments, delete old segments
     oldSegments.each{|segment|segment.delete}
-    # step2. split all segments by meaningful and meaningless
+    # step2. split all segments by meaningful and unknown
     #      . adjust meaningful segments by giving futher transportation analysis
-    # Following are the rules for meaningless segments.
+    # Following are the rules for unknown segments.
     # => no valid speed for any points within this segment.
     # => number of points < 10 and endTime - startTime < 10(s)
     # => distance < 10(m)
@@ -97,8 +97,8 @@ class Trip < ActiveRecord::Base
         currentSegment = result["segment"]
       else
         if currentSegment.transportation == segment.transportation
-          # merge continuous meaningless segments
-          if currentSegment.transportation == "meaningless"
+          # merge continuous unknown segments
+          if currentSegment.transportation == "unknown"
             mergeSegment(currentSegment, segment)
           end
         else
@@ -144,7 +144,7 @@ class Trip < ActiveRecord::Base
     end
 
     if currentSegment.transportation == "stopping" || currentSegment.locations.count < 10 || (currentSegment.endTime.to_i - currentSegment.startTime.to_i) < 10 || currentSegment.distance < 20 || currentSegment.highestSpeed <= LOW_SPEED || currentSegment.avgSpeed <= LOW_SPEED
-      currentSegment.transportation = "meaningless"
+      currentSegment.transportation = "unknown"
     else
       averageResult = transFromAVG(currentSegment.avgSpeed)
       highResult = transFromHigh(currentSegment.highestSpeed)
@@ -181,9 +181,9 @@ class Trip < ActiveRecord::Base
 
     case avgScore
     when 0
-      return {"value"=>avgScore, "transportation" => "walking"}
+      return {"value"=>avgScore, "transportation" => "walk"}
     when 1
-      return {"value"=>avgScore, "transportation" => (avgSpeed - WALKING_AVG)>(BYCYCLE_AVG - avgSpeed) ? "bicycle" : "walking"}
+      return {"value"=>avgScore, "transportation" => (avgSpeed - WALKING_AVG)>(BYCYCLE_AVG - avgSpeed) ? "bicycle" : "walk"}
     when 2
       return {"value"=>avgScore, "transportation" => (avgSpeed - BYCYCLE_AVG)>(TRAM_AVG - avgSpeed) ? "tram" : "bicycle"}
     when 3
