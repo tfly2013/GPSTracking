@@ -1,0 +1,26 @@
+<div class="page-header">
+	<h1>Report</h1>
+</div>
+<div class="row">
+	<h3>Statistics:</h3>
+	<div class="column">
+		<table class="table table-striped">
+	        <thead>
+	          <tr>
+	            <th>Trip ID</th>
+	            <th>Date</th>
+	            <th>Action</th>
+	          </tr>
+	        </thead>
+	        <tbody>
+			  <% @trips.each do |trip| %>
+	            <tr>
+	            	<td><%= trip.id%></td>
+	            	<td><%= trip.created_at.to_date %></td>
+	            	<td><%= link_to 'Show', trip, :class =>  'btn btn-info' %></td>
+	            </tr>
+	          <% end %>
+	         </tbody>
+         </table>
+	</div>
+</div>
