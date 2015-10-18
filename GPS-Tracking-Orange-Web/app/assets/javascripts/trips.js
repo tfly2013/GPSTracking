@@ -309,6 +309,9 @@ function mergeSegments(from, to){
 		segments[to].setPath(trip[to]);
 		zones[to].setMap(null);
 		zones.splice(to, 1);
+		zones[from].segAfter = segments[to];
+		segments[to].zoneBefore = zones[from];
+		updateStr(zones[from]);
 	}
 	else{
 		trip[from].shift();
@@ -317,16 +320,23 @@ function mergeSegments(from, to){
 		segments[to].setPath(trip[to]);
 		zones[from].setMap(null);
 		zones.splice(from, 1);
+		zones[from].segBefore = segments[to];
+		segments[to].zoneAfter = zones[from];
+		updateStr(zones[from]);
 	}
-	zones[from].segBefore = segments[to];
-	segments[to].zoneAfter = zones[from];
-	updateStr(zones[from]);
 
 	if (trip[from].segId != null)
 		destroyed.push(trip[from].segId);
 	trip.splice(from, 1);
 	segments[from].setMap(null);
 	segments.splice(from, 1);
+
+	for (var i = 0; i < segments.length ; i++){
+		segments[i].id = i;	
+	}
+	for (var i = 0; i < zones.length ; i++){
+		zones[i].id = i;
+	}
 
 	$("#accordion h3:not(.ui-draggable-dragging)").last().remove();
 	$("#accordion div").last().remove();
@@ -375,7 +385,7 @@ function updateSegments(zone){
 	else{
 		// similar to before
 		trip[id].shift();
-		removed = trip[id].splice(0, n - 1, latlng);
+		removed = trip[id].splice(0, n, latlng);
 		if (trip[id-1][trip[id-1].length - 1].id == null){
 			trip[id-1].pop();
 		}
