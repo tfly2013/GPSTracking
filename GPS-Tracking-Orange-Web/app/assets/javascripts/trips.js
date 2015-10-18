@@ -6,7 +6,6 @@ var colours = ["red","orange","green","blue","purple"];
 var zones = [];
 var segments = [];
 var destroyed = [];
-var selected;
 var map;
 
 /***
@@ -107,7 +106,6 @@ function initalizeAccordion(exist){
 
 function selectSegment(id){
 	if (id == null){
-		selected = null;
 		for (var i = 0; i < segments.length ; i++){
 			segments[i].setOptions({
 				strokeColor: colours[i%colours.length] 
@@ -120,11 +118,7 @@ function selectSegment(id){
 			segments[i].setOptions({
 				strokeColor: '#C8C8C8'
 			});		
-		selected = segments[id];
-		google.maps.event.addListener(selected, "dblclick", function(e){
-			addSegment(e.latLng);
-		});
-		selected.setOptions({
+		segments[id].setOptions({
 			strokeColor: colours[id%colours.length]
 		});
 	}
@@ -142,6 +136,9 @@ function drawSegments() {
 		});
 		segment.setMap(map);
 		segment.id = i;
+		google.maps.event.addListener(segment, "dblclick", function(e){
+			addSegment(e.latLng, this.id);
+		});
 		segments.push(segment);
 	}
 }
@@ -223,10 +220,9 @@ function snapZoneToSegments(zone){
 
 }
 
-function addSegment(latlng){
+function addSegment(latlng, id){
 	// Add segment
-	var id = selected.id;
-	var zone = selected.zoneAfter;
+	var zone = segments[id].zoneAfter;
 	var newSeg = null;
 	if (zone != null){
 		var n = zone.str.getPointPosition(latlng);
@@ -234,7 +230,7 @@ function addSegment(latlng){
 		newSeg.push(latlng);		
 	}
 	else{
-		zone = selected.zoneBefore;
+		zone = segments[id].zoneBefore;
 		var n = zone.str.getPointPosition(latlng) - trip[id-1].length;
 		newSeg = trip[id].splice(n, trip[id].length-n, latlng);
 		newSeg.unshift(latlng);	
@@ -248,6 +244,9 @@ function addSegment(latlng){
 		strokeWeight: 7
 	});
 	segment.setMap(map);
+	google.maps.event.addListener(segment, "dblclick", function(e){
+		addSegment(e.latLng, this.id);
+	});
 	segments.splice(id,0,segment);
 
 	for (var i = 0; i < segments.length ; i++){
@@ -296,7 +295,6 @@ function updateAccordion(){
 		input.value = trip[i].transportation;
 	}
 	initalizeAccordion(true);
-	selected = null;
 }
 
 function mergeSegments(from, to){	
@@ -311,7 +309,6 @@ function mergeSegments(from, to){
 		zones.splice(to, 1);
 		zones[from].segAfter = segments[to];
 		segments[to].zoneBefore = zones[from];
-		updateStr(zones[from]);
 	}
 	else{
 		trip[from].shift();
@@ -322,7 +319,6 @@ function mergeSegments(from, to){
 		zones.splice(from, 1);
 		zones[from].segBefore = segments[to];
 		segments[to].zoneAfter = zones[from];
-		updateStr(zones[from]);
 	}
 
 	if (trip[from].segId != null)
@@ -332,10 +328,14 @@ function mergeSegments(from, to){
 	segments.splice(from, 1);
 
 	for (var i = 0; i < segments.length ; i++){
-		segments[i].id = i;	
+		segments[i].id = i;
+		segments[i].setOptions({
+			strokeColor: colours[i%colours.length] 
+		});		
 	}
 	for (var i = 0; i < zones.length ; i++){
 		zones[i].id = i;
+		updateStr(zones[i]);
 	}
 
 	$("#accordion h3:not(.ui-draggable-dragging)").last().remove();
@@ -385,7 +385,7 @@ function updateSegments(zone){
 	else{
 		// similar to before
 		trip[id].shift();
-		removed = trip[id].splice(0, n, latlng);
+		removed = trip[id].splice(0, n - 1, latlng);
 		if (trip[id-1][trip[id-1].length - 1].id == null){
 			trip[id-1].pop();
 		}
