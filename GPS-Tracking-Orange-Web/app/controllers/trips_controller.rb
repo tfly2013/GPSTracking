@@ -77,6 +77,12 @@ class TripsController < ApplicationController
           end
         end
       end
+      if !trip_params[:destroyed].nil?
+        trip_params[:destroyed].each do |id|
+          segment = Segment.find(id)
+          segment.destroy
+        end
+      end
       @trip.validated = true
       @trip.save!
     end
@@ -113,6 +119,6 @@ end
 def trip_params
   params.require(:trip).permit(:segments_attributes =>
    [:id, :transportation, :order, :locations_attributes =>
-    [:id, :latitude, :longitude, :order]])
+    [:id, :latitude, :longitude, :order]], :destroyed => [])
 end
 end

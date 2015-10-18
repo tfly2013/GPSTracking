@@ -5,6 +5,7 @@ debugger;
 var colours = ["red","orange","green","blue","purple"];
 var zones = [];
 var segments = [];
+var destroyed = [];
 var selected;
 var map;
 
@@ -278,7 +279,6 @@ function addSegment(latlng){
 		zones[i].id = i;
 		updateStr(zones[i]);
 	}
-
 	$("#accordion").append("<h3 /><div>" + 
 		"<label calss='control-label'>Transportation</label>" +
 		"<input type='text' class='form-control' /></div>");
@@ -286,7 +286,7 @@ function addSegment(latlng){
 }
 
 function updateAccordion(){
-	var titles = $("#accordion").children("h3");
+	var titles = $("#accordion").children("h3:not(.ui-draggable-dragging)");
 	var contents = $("#accordion").children("div");
 	for (var i = 0; i < trip.length ; i++){
 		titles[i].id = "" + i;
@@ -299,7 +299,38 @@ function updateAccordion(){
 	selected = null;
 }
 
-function mergeSegments(from, to){
+function mergeSegments(from, to){	
+	if (Math.abs(from - to) != 1)
+		return;
+	if (from < to){
+		trip[from].pop();
+		for (var i = trip[from].length - 1; i >= 0; i--)
+			trip[to].unshift(trip[from][i]);
+		segments[to].setPath(trip[to]);
+		zones[to].setMap(null);
+		zones.splice(to, 1);
+	}
+	else{
+		trip[from].shift();
+		for (var i = 0; i < trip[from].length; i++)
+			trip[to].push(trip[from][i]);
+		segments[to].setPath(trip[to]);
+		zones[from].setMap(null);
+		zones.splice(from, 1);
+	}
+	zones[from].segBefore = segments[to];
+	segments[to].zoneAfter = zones[from];
+	updateStr(zones[from]);
+
+	if (trip[from].segId != null)
+		destroyed.push(trip[from].segId);
+	trip.splice(from, 1);
+	segments[from].setMap(null);
+	segments.splice(from, 1);
+
+	$("#accordion h3:not(.ui-draggable-dragging)").last().remove();
+	$("#accordion div").last().remove();
+	updateAccordion();
 }
 
 /** Update segment after zone has changed position
@@ -377,7 +408,7 @@ function saveTrip(){
 	for (var i = 0; i < trip.length; i++){
 		var segment = {};
 		segment.id = trip[i].segId;
-		segment.transportation = $("#transportation-" + i)[0].value;
+		segment.transportation = $("#transportation-" + i)[0].value.toLowerCase();
 		segment.order = i + 1;
 		var locations = [];
 		// The last point is the repeat of the first point of next segment
@@ -394,6 +425,8 @@ function saveTrip(){
 		segments.push(segment);
 	}
 	tripData.segments_attributes = segments;
+	if (destroyed.length > 0)
+		tripData.destroyed = destroyed;
 	$.ajax({
 		type: "PATCH",
 		url: tripUrl,
