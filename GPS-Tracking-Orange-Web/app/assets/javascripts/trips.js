@@ -23,11 +23,10 @@ function initMap(){
 	google.maps.event.addListenerOnce(map,"projection_changed", function() {
 		phaseTrip();
 		zoomToTrip();
-		addSegmentsToAccordion();		
-		testMarkers();
+		initalizeAccordion();		
+		// testMarkers();
 		drawSegments();
 		drawZones();
-		snapZonesToSegments();
 	});
 }
 
@@ -39,7 +38,8 @@ function phaseTrip(){
 		return;	
 	for (var i = 0; i < trip.length ; i++){
 		var segment = [];
-		segment.id = trip[i].id;
+		segment.id = i;
+		segment.segId = trip[i].id;
 		segment.transportation = trip[i].transportation;
 		for (var j = 0; j < trip[i].locations.length; j++){
 			var latlng = new google.maps.LatLng(
@@ -66,7 +66,7 @@ function zoomToTrip(){
 	map.fitBounds(bounds);
 }
 
-function addSegmentsToAccordion(){
+function initalizeAccordion(exist){
 	for (var i = 0; i < trip.length ; i++){
 		$("[title]").tooltip();
 		$("#" + i).draggable({
@@ -88,17 +88,20 @@ function addSegmentsToAccordion(){
 			}
 		});
 	}
-	$("#accordion").accordion({
-		collapsible: true,
-		active: false,
-		heightStyle: "content",
-		activate: function( event, ui ) {
-			var id;
-			if (ui.newHeader.length > 0)
-				id = ui.newHeader[0].id;			
-			selectSegment(id);
-		}
-	});
+	if (exist)
+		$("#accordion").accordion("refresh").accordion("option", "active", false);
+	else
+		$("#accordion").accordion({
+			collapsible: true,
+			active: false,
+			heightStyle: "content",
+			activate: function(event, ui){
+				var id;
+				if (ui.newHeader.length > 0)
+					id = ui.newHeader[0].id;			
+				selectSegment(id);
+			}
+		});
 }
 
 function selectSegment(id){
@@ -126,44 +129,6 @@ function selectSegment(id){
 	}
 }
 
-function addSegment(latlng){
-	var id = selected.id;
-	var zone = selected.zoneAfter;
-	var newSeg = null;
-	if (zone != null){
-		var n = zone.str.getPointPosition(latlng);
-		newSeg = trip[id].splice(0, n, latlng);
-		newSeg.push(latlng);		
-	}
-	else{
-		zone = selected.zoneBefore;
-		var n = zone.str.getPointPosition(latlng) - trip[id-1].length;
-		newSeg = trip[id].splice(n, trip[id].length-n, latlng);
-		newSeg.unshift(latlng);	
-	}
-	segments[id].setPath(trip[id]);
-	trip.splice(id, 0, newSeg);	
-	var line = new google.maps.Polyline({
-		path: newSeg,
-		strokeColor: "black",
-		strokeWeight: 7
-	});
-	line.setMap(map);
-	segments.splice(id,0,line);
-
-	var zone = new google.maps.Marker({
-		position: latlng
-	});
-	zone.setMap(map);
-
-	for (var i = 0; i < segments.length ; i++){
-		segments[i].id = i;
-		segments[i].setOptions({
-			strokeColor: colours[i%colours.length] 
-		});		
-	}
-}
-
 /*** 
 * Draw each segement (polyline)
 */
@@ -175,7 +140,6 @@ function drawSegments() {
 			strokeWeight: 7
 		});
 		segment.setMap(map);
-		segment.segId = trip[i].id;
 		segment.id = i;
 		segments.push(segment);
 	}
@@ -223,6 +187,7 @@ function drawZones(){
 		zone.segBefore = segments[i - 1];
 		segments[i - 1].zoneAfter = zone;
 		zone.fixed = false;
+		snapZoneToSegments(zone);
 		zones.push(zone);
 	}
 	// The end position
@@ -240,23 +205,98 @@ function drawZones(){
 
 /** snap zones to segments, make zones can only move along segments
 */
-function snapZonesToSegments(){
-	for (var i = 1; i < zones.length - 1; i++){
-		var zone = zones[i];
-		var before = zone.segBefore.getPath().getArray();
-		var after = zone.segAfter.getPath().getArray();
-		// the moving range of a zone is segment before plus segment after
-		merged = new google.maps.Polyline({
-			path: before.concat(after)
-		});
-		zone.str = new SnapToRoute(map, zone, merged);
-		// google.maps.event.addListener(zone, "drag", function(){
-		// 	updateSegments(this);
-		// });
-google.maps.event.addListener(zone, "dragend", function(){
-	updateSegments(this);
-});
+function snapZoneToSegments(zone){
+	var before = zone.segBefore.getPath().getArray();
+	var after = zone.segAfter.getPath().getArray();
+	// the moving range of a zone is segment before plus segment after
+	merged = new google.maps.Polyline({
+		path: before.concat(after)
+	});
+	zone.str = new SnapToRoute(map, zone, merged);
+	google.maps.event.addListener(zone, "drag", function(){
+		updateSegments(this);
+	});
+	google.maps.event.addListener(zone, "dragend", function(){
+		updateSegments(this);
+	});
+
 }
+
+function addSegment(latlng){
+	// Add segment
+	var id = selected.id;
+	var zone = selected.zoneAfter;
+	var newSeg = null;
+	if (zone != null){
+		var n = zone.str.getPointPosition(latlng);
+		newSeg = trip[id].splice(0, n, latlng);
+		newSeg.push(latlng);		
+	}
+	else{
+		zone = selected.zoneBefore;
+		var n = zone.str.getPointPosition(latlng) - trip[id-1].length;
+		newSeg = trip[id].splice(n, trip[id].length-n, latlng);
+		newSeg.unshift(latlng);	
+	}
+	newSeg.transportation = "unknown";
+	segments[id].setPath(trip[id]);
+	trip.splice(id, 0, newSeg);	
+	var segment = new google.maps.Polyline({
+		path: newSeg,
+		strokeColor: "black",
+		strokeWeight: 7
+	});
+	segment.setMap(map);
+	segments.splice(id,0,segment);
+
+	for (var i = 0; i < segments.length ; i++){
+		segments[i].id = i;
+		segments[i].setOptions({
+			strokeColor: colours[i%colours.length] 
+		});		
+	}
+
+	// Add zone
+	var zone = new google.maps.Marker({
+		position: latlng,
+		draggable: true
+	});
+	zone.setMap(map);
+	zone.segBefore = segments[id];
+	segments[id].zoneAfter = zone;
+	zone.segAfter = segments[id + 1];
+	segments[id + 1].zoneBefore = zone;
+	zone.fixed = false;	
+	snapZoneToSegments(zone);
+	zone.str = new SnapToRoute(map, zone, merged);
+	zones.splice(id + 1, 0, zone);
+
+	zones[id].segAfter = segments[id];
+	segments[id].zoneBefore = zones[id];
+
+	for (var i = 0; i < zones.length ; i++){
+		zones[i].id = i;
+		updateStr(zones[i]);
+	}
+
+	$("#accordion").append("<h3 /><div>" + 
+		"<label calss='control-label'>Transportation</label>" +
+		"<input type='text' class='form-control' /></div>");
+	updateAccordion(id);
+}
+
+function updateAccordion(){
+	var titles = $("#accordion").children("h3");
+	var contents = $("#accordion").children("div");
+	for (var i = 0; i < trip.length ; i++){
+		titles[i].id = "" + i;
+		titles[i].textContent = "Segment " + (i + 1);
+		input = contents[i].children[1];
+		input.id = "transportation-" + i;
+		input.value = trip[i].transportation;
+	}
+	initalizeAccordion(true);
+	selected = null;
 }
 
 function mergeSegments(from, to){
@@ -336,7 +376,7 @@ function saveTrip(){
 	var segments = [];
 	for (var i = 0; i < trip.length; i++){
 		var segment = {};
-		segment.id = trip[i].id;
+		segment.id = trip[i].segId;
 		segment.transportation = $("#transportation-" + i)[0].value;
 		segment.order = i + 1;
 		var locations = [];

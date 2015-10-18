@@ -39,7 +39,7 @@
       <% @trip.segments.order(:order).each_with_index do |segment,index| %>
         <h3 id = <%= index %>> Segment <%= index + 1 %> </h3>
         <div>
-          <% if !segment.startTime.nil? %>
+        <!--<% if !segment.startTime.nil? %>
             <label class='control-label'>Start Time</label>
             <p><%= segment.startTime.localtime.strftime("%I:%M %P") %></p>
           <% end %>
@@ -58,7 +58,7 @@
           <% if !segment.avgSpeed.nil? %>
             <label class='control-label'>Average Speed</label>
             <p><%= segment.avgSpeed.round(2) %> m/s</p>
-          <% end %>
+          <% end %> -->
           <label class='control-label'>Transportation</label>
           <input type='text' id = transportation-<%= index %> class='form-control' value='<%= segment.transportation %>' />
         </div>
