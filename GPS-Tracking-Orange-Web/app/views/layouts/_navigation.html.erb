@@ -19,13 +19,12 @@
 					<i class="fa fa-suitcase"></i> Trips
 					<% end %>
 				</li>
-				<% if current_user.try(:admin?) || current_user.try(:researcher?) %>
 				<li>
 					<%= link_to reports_path do %>
 					<i class="fa fa-file-text"></i> Report
 					<% end %>
 				</li>
-				<% end %>
+				
 				<% if current_user.try(:admin?) %>
 				<li>
 					<%= link_to users_path do %>
