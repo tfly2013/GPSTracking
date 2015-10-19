@@ -1,17 +1,17 @@
 <div class="page-header">
-	<h1>Report</h1>
+	<h1>Overall Report</h1>
 </div>
 <div class="row">
 	<h3>Statistics:</h3>
-	<label class="col-sm-2">Average Distance:</label>
+	<label class="col-sm-2">Trips Average Distance:</label>
 	<div class="col-sm-10">
-		<%= @average_distance %> m
+		<%= (distance(Segment.all)/Trip.count/1000).round(2) %> km
 	</div>
 </div>
 <div class="row">
-	<label class="col-sm-2">Average Speed:</label>
+	<label class="col-sm-2">Trips Average Speed:</label>
 	<div class="col-sm-10">
-		<%= @average_speed %> m/s
+		<%= (average_speed(Segment.all) * 3.6).round(2) %> km/h
 	</div>
 </div>
 <div class="row">

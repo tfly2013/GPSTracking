@@ -74,3 +74,26 @@ footer {
   background-color: #1B1C1D;
   color: #9D9D9D;
 }
+.inverse-dropdown{
+  background-color: #222;
+  border-color: #080808;
+  &>li>a{
+    color: #999;
+    &:hover{
+      color: #fff;
+      background-color: transparent;
+    }
+  }
+  &>.active>a{
+    color: #fff;
+    background-color: #090909;
+    &:hover{
+      color: #fff;
+      background-color: transparent;
+    }
+  }
+}
+.dropdown:hover .dropdown-menu {
+  display: block;
+  margin-top: 0;
+}

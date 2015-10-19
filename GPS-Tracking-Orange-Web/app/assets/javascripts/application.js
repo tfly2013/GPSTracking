@@ -15,7 +15,7 @@
 //= require jquery-ui
 //= require fusioncharts/fusioncharts
 //= require fusioncharts/fusioncharts.charts
-//= require fusioncharts/themes/fusioncharts.theme.fint
+//= require fusioncharts/themes/fusioncharts.theme.ocean
 //= require gritter
 //= require bootstrap-sprockets
 //= require turbolinks

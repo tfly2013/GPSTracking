@@ -19,12 +19,33 @@
 					<i class="fa fa-suitcase"></i> Trips
 					<% end %>
 				</li>
-				<li>
-					<%= link_to reports_path do %>
-					<i class="fa fa-file-text"></i> Report
-					<% end %>
-				</li>
-				
+				<% if current_user.try(:researcher?) || current_user.try(:admin?) %>
+					<li class="dropdown">
+					    <a href="#" class="dropdown-toggle" 
+					    data-toggle="dropdown" role="button" 
+					    aria-haspopup="true" aria-expanded="false">
+					    <i class="fa fa-file-text"></i>
+					    Report <span class="caret"></span></a>	
+					    <ul class="dropdown-menu inverse-dropdown">
+					    <li>					
+							<%= link_to user_report_path do %>
+							<i class="fa fa-file-text"></i> User Report
+							<% end %>					
+						</li>
+					    <li>					
+							<%= link_to overall_report_path do %>
+							<i class="fa fa-file-text"></i> Overall Report
+							<% end %>					
+						</li>
+					    </ul>
+					</li>
+				<% else %>
+					<li>					
+						<%= link_to user_report_path do %>
+						<i class="fa fa-file-text"></i> Report
+						<% end %>					
+					</li>
+				<% end %>
 				<% if current_user.try(:admin?) %>
 				<li>
 					<%= link_to users_path do %>
@@ -63,7 +84,7 @@
 	</div>
 </nav>
 <script>
-	$(function() {
-		$('a[href="' + this.location.pathname + '"]').parent().addClass('active');
-	}); 
+$(function() {
+	$('a[href="' + this.location.pathname + '"]').parent().addClass('active');
+}); 
 </script>

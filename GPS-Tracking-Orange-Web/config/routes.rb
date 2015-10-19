@@ -4,8 +4,9 @@ Rails.application.routes.draw do
   resources :users
   resources :trips, only: [:index, :create, :show, :update, :destroy]
 
-  get 'reports', to: 'reports#index'
-     
+  get 'user_report', to: 'reports#user'
+  get 'overall_report', to: 'reports#overall'
+
   namespace :api do
     devise_scope :user do
       post 'sign_in' => 'sessions#create'

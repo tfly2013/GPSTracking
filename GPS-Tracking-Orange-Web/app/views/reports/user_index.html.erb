@@ -1,92 +1,46 @@
-<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-<script src="//code.jquery.com/jquery-1.10.2.js"></script>
-<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-<style>
-#accordion {
-    width:500px;
-    float:left;
-    padding:10px;	 	 
-}
-</style>
-<script>
-  var icons = {
-   header: "ui-icon-circle-arrow-e",
-   activeHeader: "ui-icon-circle-arrow-s"
-  };
-  $(function() {
-    $( "#accordion" ).accordion()({
-    	heightStyle: "fill"
-    });
-  });
-  $(function() {
-    $( "#accordion-resizer" ).resizable({
-      minHeight: 140,
-      minWidth: 200,
-      resize: function() {
-        $( "#accordion" ).accordion( "refresh" );
-      }
-    });
-  });
-</script>
-
 <div class="page-header">
-	<h1>Report</h1>
+  <h1>User Report</h1>
 </div>
 <div class="row">
-	<h3>Statistics:</h3>
-	<div id="accordion">
-		<% @trips.each do |trip| %>
-	       <h3>Trip <%= trip.id%></h3>
-	       <div>
-		       <table>
-		       	  <tr>
-		       	  	<th>Start Date</th>
-		       	  	<td><%= trip.created_at.to_date %></td>
-		       	  </tr>
-		       	  <tr>
-		       	  	<th>Travel Time</th>
-		       	  	<td><%= startTime = Segment.where("trip_id = ?", trip.id).first.startTime
-		       	  			endTime = Segment.where("trip_id = ?", trip.id).last.endTime     	  			
-		       	  			(endTime - startTime)/3600.0
-		       	  		%>
-		       	  		 hours
-		       	  	</td>
-		       	  </tr>
-		       	  
-		       	  <tr>
-		       	  	<th>Transfer Zone</th>
-		       	  	<td>
-		       	  		<%= Segment.where("trip_id = ?", trip.id).length - 1%>
-		       	  	</td>
-		       	  </tr>
-		       	  
-		       	  <tr>
-		       	  	<th>Average Speed</th>
-		       	  	<td>
-		       	  		<%= segments = Segment.where("trip_id = ?", trip.id)
-		       	  			avgSpeed = 0
-		       	  			segments.each do |segment|
-		       	  				avgSpeed += segment.avgSpeed
-		       	  			end
-		       	  			segmentNum = Segment.where("trip_id = ?", trip.id).length
-		       	  			avgSpeed / segmentNum
-						%> 
-						m/s
-		       	  	</td>
-		       	  </tr>
-		       	  
-		       	  <tr>
-		       	  	<th>Distance</th>
-		       	  	<td><%= segments = Segment.where("trip_id = ?", trip.id)
-		       	  			distance = 0
-		       	  			segments.each do |segment|
-		       	  				distance += segment.distance
-		       	  			end
-		       	  			distance %>
-		       	  	</td>
-		       	  </tr>
-	           </table>
-	        </div>
-        <% end %>
-	</div>
+  <h3>Statistics:</h3>
+  <div id="accordion">
+    <% @trips.each do |trip| %>
+      <h3>Trip <%= trip.id%></h3>
+      <div>
+        <table class="table">
+          <tr>
+            <th>Start Date</th>
+            <td><%= trip.created_at.to_date %></td>
+          </tr>
+          <tr>
+            <th>Travel Time</th>
+            <td><%= travel_time(trip) %></td>
+          </tr>
+          <tr>
+            <th>No. of Transfer Zones</th>
+            <td>
+              <%= trip.segments.length - 1%>
+            </td>
+          </tr>
+          <tr>
+            <th>Average Speed</th>
+            <td>
+              <%= (average_speed(trip.segments) * 3.6).round(2) %> km/h </td>
+          </tr>
+          <tr>
+            <th>Distance</th>
+            <td><%= (distance(trip.segments) / 1000).round(2) %> km </td>
+          </tr>
+        </table>
+      </div>
+    <% end %>
+  </div>
 </div>
+<script type="text/javascript">
+$(function() {
+  $( "#accordion" ).accordion({
+    collapsible: true,
+    heightStyle: "fill"
+  });
+});
+</script>
