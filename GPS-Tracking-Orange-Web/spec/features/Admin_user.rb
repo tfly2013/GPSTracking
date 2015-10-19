@@ -29,7 +29,26 @@ describe "the actions of Admin users ", :type => :feature do
     find_link('Sign In')
   end
 
-    it "sign in as admin to see reports then sign out" do
+    it "sign in as admin to see user reports then sign out" do
+    # pending("will raise ZeroDivisionError")
+    visit '/home/index'
+    find_link('Sign In').click
+    fill_in 'Email', :with => 'adminkaiqi@test.com'
+    fill_in 'Password', :with => 'abc123456'
+    find_button('Sign in').click
+    expect(current_path).to eq('/')
+    # save_and_open_page
+    expect(page).to have_content 'Trips'
+    expect(page).to have_content 'Report'
+    expect(page).to have_content 'Users'
+    expect(page).to have_content 'View My Trips'
+    find_link('Report').click
+    find_link('User Report').click
+    find_link('Report')
+    expect(current_path).to eq('/user_report')
+    expect(page).to have_content 'Statistics:'
+  end
+      it "sign in as admin to see overall reports then sign out" do
     pending("will raise ZeroDivisionError")
     visit '/home/index'
     find_link('Sign In').click
@@ -43,9 +62,10 @@ describe "the actions of Admin users ", :type => :feature do
     expect(page).to have_content 'Users'
     expect(page).to have_content 'View My Trips'
     find_link('Report').click
-    expect(current_path).to eq('/reports')
+    find_link('Overall Report').click
+    find_link('Report')
+    expect(current_path).to eq('/user_report')
     expect(page).to have_content 'Statistics:'
-    save_and_open_page
   end
   
     it "sign in as admin to see users then sign out" do

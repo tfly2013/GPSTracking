@@ -78,8 +78,27 @@ describe "the signin process", :type => :feature do
     find_link('Sign In')
   end
 
-    it "sign in as researcher to see reports then sign out" do
-    pending("researcher should be able to see reports")
+  #   it "sign in as researcher to see reports then sign out" do
+  #   pending("researcher should be able to see reports")
+  #   visit '/home/index'
+  #   find_link('Sign In').click
+  #   fill_in 'Email', :with => 'reseakaiqi@test.com'
+  #   fill_in 'Password', :with => 'abc123456'
+  #   find_button('Sign in').click
+  #   expect(current_path).to eq('/')
+  #   # save_and_open_page
+  #   expect(page).to have_content 'Trips'
+  #   expect(page).to have_content 'Report'
+  #   expect(page).to have_content 'Users'
+  #   expect(page).to have_content 'View My Trips'
+  #   find_link('Report').click
+  #   expect(current_path).to eq('/reports')
+  #   expect(page).to have_content 'Statistics:'
+  #   save_and_open_page
+  # end
+
+    it "sign in as researcher to see user reports then sign out" do
+    # pending("will raise ZeroDivisionError")
     visit '/home/index'
     find_link('Sign In').click
     fill_in 'Email', :with => 'reseakaiqi@test.com'
@@ -89,12 +108,18 @@ describe "the signin process", :type => :feature do
     # save_and_open_page
     expect(page).to have_content 'Trips'
     expect(page).to have_content 'Report'
-    expect(page).to have_content 'Users'
     expect(page).to have_content 'View My Trips'
-    find_link('Report').click
-    expect(current_path).to eq('/reports')
-    expect(page).to have_content 'Statistics:'
     save_and_open_page
+
+    find_link('Report').click
+
+    
+    find_link('Report')
+    expect(current_path).to eq('/user_report')
+    expect(page).to have_content 'Statistics:'
+    expect(page).not_to have_link 'User Report'
+    expect(page).not_to have_link 'Overall Report'
+
   end
 
 
