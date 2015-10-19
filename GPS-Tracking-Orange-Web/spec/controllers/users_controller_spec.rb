@@ -180,7 +180,6 @@ RSpec.describe UsersController, type: :controller do
         end
 
         it "failed to update with a out of range value of role" do
-        pending("out of range value of role")
         build_many_user
         user = login_admin
         ano_user = User.all.first
