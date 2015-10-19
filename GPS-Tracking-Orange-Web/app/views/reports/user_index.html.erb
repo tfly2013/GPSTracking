@@ -3,9 +3,9 @@
 </div>
 <div class="row">
   <h3>Statistics:</h3>
-  <div id="report_accordion">
-    <% @trips.each do |trip| %>
-      <h3>Trip <%= trip.id%></h3>
+  <div id="report_accordion" class="col-md-6">
+    <% @trips.each_with_index do |trip, index| %>
+      <h3>Trip <%= index + 1 %></h3>
       <div>
         <table class="table">
           <tr>
