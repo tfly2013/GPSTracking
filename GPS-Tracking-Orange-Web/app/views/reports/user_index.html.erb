@@ -3,7 +3,7 @@
 </div>
 <div class="row">
   <h3>Statistics:</h3>
-  <div id="accordion">
+  <div id="report_accordion">
     <% @trips.each do |trip| %>
       <h3>Trip <%= trip.id%></h3>
       <div>
@@ -38,7 +38,7 @@
 </div>
 <script type="text/javascript">
 $(function() {
-  $( "#accordion" ).accordion({
+  $("#report_accordion").accordion({
     collapsible: true,
     heightStyle: "fill"
   });

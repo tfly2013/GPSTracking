@@ -20,7 +20,7 @@ class Trip < ActiveRecord::Base
   TRAIN_AVG = 16.66
   CAR_AVG = 16.66
 
-  TRANSPORTATIONS = ["walk", "bicycle", "tram", "bus", "train", "car", "unknown"]
+  TRANSPORTATIONS = ["walking", "bicycle", "tram", "bus", "train", "car", "unknown"]
 
   def SegmentsRecognize
     @trip = self
