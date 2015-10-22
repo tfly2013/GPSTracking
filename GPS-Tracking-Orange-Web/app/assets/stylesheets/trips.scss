@@ -15,7 +15,7 @@
  	margin: 8px;
  	padding: 10px;
  	border-radius: 8px;
- 	height: 470px;
+ 	max-height: 470px;
  }
  .segment-drop-active{
  	background: #707070;
@@ -26,6 +26,6 @@
  	color: #555555;
  }
  #accordion{
- 	height: 350px;
+ 	max-height: 350px;
  	overflow: auto;
  }

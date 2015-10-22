@@ -1,37 +1,6 @@
 <div class="map-container">
   <div id="map"></div>
 </div>
-<div class="row">
-  <h3>For development use only:</h3>
-  <% @trip.segments.order(:order).each_with_index do |segment,index| %>
-    <h3>Segment <%= index + 1 %> </h3>
-    <div class="cloumn">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Latitude</th>
-            <th>Longitude</th>
-            <th>Speed</th>
-            <th>Accuracy</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% segment.locations.order(:order).each do |location| %>
-            <tr>
-              <td><%= location.latitude %></td>
-              <td><%= location.longitude %></td>
-              <td><%= location.speed %></td>
-              <td><%= location.accuracy %></td>
-              <td><%= location.time %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-  <% end %>
-  <br />
-</div>
 <div id="map-control">
   <h3>Trip</h3>
   <div role="form">
